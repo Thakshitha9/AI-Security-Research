@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>RAG Assistant | AI Security</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        /* RAG answer formatting */
+        #ragAnswer {
+            white-space: pre-line;
+            line-height: 1.7;
+        }
+
+        /* Retrieved sources */
+        .rag-sources {
+            margin-top: 25px;
+        }
+
+        .rag-source-card {
+            padding: 15px;
+            margin-top: 12px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .rag-source-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .rag-source-text {
+            line-height: 1.6;
+            opacity: 0.85;
+        }
+
+        .sources-title {
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                AI
+            </div>
+
+            <div>
+                <h2>AI Security</h2>
+                <span>Security Platform</span>
+            </div>
+
+        </div>
+
+
+        <nav class="navigation">
+
+            <p class="nav-title">MAIN</p>
+
+            <a href="index.html" class="nav-item">
+                <span>▦</span>
+                Dashboard
+            </a>
+
+            <a href="phishing.html" class="nav-item">
+                <span>⚠</span>
+                Phishing Detection
+            </a>
+
+            <a href="rag.html" class="nav-item active">
+                <span>◈</span>
+                RAG Assistant
+            </a>
+
+            <a href="#" class="nav-item">
+                <span>🛡</span>
+                Prompt Guard
+            </a>
+
+            <a href="#" class="nav-item">
+                <span>⌁</span>
+                Recon AI
+            </a>
+
+            <p class="nav-title">SECURITY</p>
+
+            <a href="#" class="nav-item">
+                <span>▤</span>
+                Security Reports
+            </a>
+
+            <a href="#" class="nav-item">
+                <span>♟</span>
+                Honeypot
+            </a>
+
+            <a href="#" class="nav-item">
+                <span>◷</span>
+                Activity Logs
+            </a>
+
+            <p class="nav-title">SYSTEM</p>
+
+            <a href="#" class="nav-item">
+                <span>⚙</span>
+                Settings
+            </a>
+
+        </nav>
+
+
+        <div class="system-status">
+
+            <div class="status-dot"></div>
+
+            <div>
+                <strong>System Online</strong>
+                <span>All services operational</span>
+            </div>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Topbar -->
+        <header class="topbar">
+
+            <div>
+
+                <h1>
+                    RAG Security Assistant
+                </h1>
+
+                <p>
+                    Ask questions using the security knowledge base
+                </p>
+
+            </div>
+
+
+            <div class="topbar-right">
+
+                <div class="ai-status">
+
+                    <span class="status-dot"></span>
+
+                    AI Engine Online
+
+                </div>
+
+
+                <div class="user-profile">
+
+                    <div class="avatar">
+                        SA
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Security Admin
+                        </strong>
+
+                        <span>
+                            Administrator
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- Page -->
+        <section class="page-content">
+
+
+            <!-- RAG Panel -->
+            <div class="panel detection-panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h2>
+                            Ask Security AI
+                        </h2>
+
+                        <p>
+                            Ask a cybersecurity question and retrieve
+                            information from the security knowledge base.
+                        </p>
+
+                    </div>
+
+
+                    <div class="module-icon">
+                        ◈
+                    </div>
+
+                </div>
+
+
+
+                <!-- Question -->
+                <div class="input-section">
+
+                    <label for="ragQuestion">
+                        Security Question
+                    </label>
+
+
+                    <textarea
+                        id="ragQuestion"
+                        rows="5"
+                        placeholder="Example: What is phishing?"
+                    ></textarea>
+
+
+                    <button
+                        id="askRagButton"
+                        type="button"
+                    >
+                        Ask Security AI
+                    </button>
+
+
+                    <span class="input-help">
+                        The RAG system retrieves relevant security
+                        knowledge before generating an answer.
+                    </span>
+
+                </div>
+
+
+
+                <!-- Answer -->
+                <div
+                    id="ragResult"
+                    class="result-container hidden"
+                >
+
+                    <div class="result-header">
+
+                        <div>
+
+                            <span class="result-label">
+                                RAG Response
+                            </span>
+
+                            <h2>
+                                AI Security Answer
+                            </h2>
+
+                        </div>
+
+
+                        <div class="risk-badge">
+                            RAG AI
+                        </div>
+
+                    </div>
+
+
+                    <div class="explanation">
+
+                        <h3>
+                            Answer
+                        </h3>
+
+
+                        <p id="ragAnswer">
+                            The AI response will appear here.
+                        </p>
+
+
+                        <!-- Retrieved Sources -->
+                        <div class="rag-sources">
+
+                            <h3 class="sources-title">
+                                Retrieved Security Sources
+                            </h3>
+
+                            <div id="ragSources">
+                                Retrieved documents will appear here.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Information -->
+            <div class="stats-grid">
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        📚
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Knowledge Base
+                        </span>
+
+                        <strong>
+                            ChromaDB
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        🔎
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Retrieval
+                        </span>
+
+                        <strong>
+                            Semantic Search
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        🤖
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Generation
+                        </span>
+
+                        <strong>
+                            DeepSeek AI
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- RAG Architecture -->
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h2>
+                            How RAG Works
+                        </h2>
+
+                        <p>
+                            The assistant combines document retrieval
+                            with AI generation.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="module-grid">
+
+
+                    <div class="module-card">
+
+                        <div class="module-card-icon">
+                            1
+                        </div>
+
+                        <h3>
+                            User Question
+                        </h3>
+
+                        <p>
+                            A security question is submitted to the
+                            assistant.
+                        </p>
+
+                    </div>
+
+
+                    <div class="module-card">
+
+                        <div class="module-card-icon">
+                            2
+                        </div>
+
+                        <h3>
+                            Retrieve
+                        </h3>
+
+                        <p>
+                            Relevant security documents are retrieved
+                            from the vector knowledge base.
+                        </p>
+
+                    </div>
+
+
+                    <div class="module-card">
+
+                        <div class="module-card-icon">
+                            3
+                        </div>
+
+                        <h3>
+                            Generate
+                        </h3>
+
+                        <p>
+                            The AI uses the retrieved context to generate
+                            a security-focused response.
+                        </p>
+
+                    </div>
+
+
+                    <div class="module-card">
+
+                        <div class="module-card-icon">
+                            4
+                        </div>
+
+                        <h3>
+                            Answer
+                        </h3>
+
+                        <p>
+                            The final response is presented to the
+                            security analyst.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <script src="js/rag.js"></script>
+
+</body>
+
+</html>

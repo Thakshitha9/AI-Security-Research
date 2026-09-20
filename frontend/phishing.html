@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Phishing Detection | AI Security</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                AI
+            </div>
+
+            <div>
+                <h2>AI Security</h2>
+                <span>Security Platform</span>
+            </div>
+
+        </div>
+
+
+        <nav class="navigation">
+
+            <a href="index.html" class="nav-item">
+                <span>▣</span>
+                <span>Dashboard</span>
+            </a>
+
+
+            <a href="phishing.html" class="nav-item active">
+                <span>⚠</span>
+                <span>Phishing Detection</span>
+            </a>
+
+
+            <a href="#" class="nav-item">
+                <span>◈</span>
+                <span>RAG Assistant</span>
+            </a>
+
+
+            <a href="#" class="nav-item">
+                <span>🛡</span>
+                <span>Prompt Guard</span>
+            </a>
+
+
+            <a href="#" class="nav-item">
+                <span>⌁</span>
+                <span>Recon AI</span>
+            </a>
+
+
+            <a href="#" class="nav-item">
+                <span>▤</span>
+                <span>Security Reports</span>
+            </a>
+
+
+            <a href="#" class="nav-item">
+                <span>♟</span>
+                <span>Honeypot</span>
+            </a>
+
+
+            <a href="#" class="nav-item">
+                <span>◷</span>
+                <span>Activity Logs</span>
+            </a>
+
+
+            <a href="#" class="nav-item">
+                <span>⚙</span>
+                <span>Settings</span>
+            </a>
+
+        </nav>
+
+
+        <div class="system-status">
+
+            <div class="status-dot"></div>
+
+            <div>
+                <strong>System Online</strong>
+                <span>All services operational</span>
+            </div>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================== -->
+    <main class="main-content">
+
+
+        <!-- TOP BAR -->
+        <header class="topbar">
+
+            <div>
+
+                <h1>
+                    Phishing Detection
+                </h1>
+
+                <p>
+                    AI-powered phishing URL analysis
+                </p>
+
+            </div>
+
+
+            <div class="topbar-right">
+
+                <div class="ai-status">
+
+                    <span class="status-dot"></span>
+
+                    AI Engine Online
+
+                </div>
+
+
+                <div class="user-profile">
+
+                    <div class="avatar">
+                        SA
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Security Admin
+                        </strong>
+
+                        <span>
+                            Administrator
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- =========================
+             PAGE CONTENT
+        ========================== -->
+        <section class="page-content">
+
+
+            <!-- =========================
+                 DETECTION PANEL
+            ========================== -->
+            <div class="panel detection-panel">
+
+
+                <!-- PANEL HEADER -->
+                <div class="panel-header">
+
+                    <div>
+
+                        <h2>
+                            Analyze a URL
+                        </h2>
+
+                        <p>
+                            Enter a website URL to determine whether it is
+                            legitimate or potentially malicious.
+                        </p>
+
+                    </div>
+
+
+                    <div class="module-icon">
+                        ⚠
+                    </div>
+
+                </div>
+
+
+
+                <!-- =========================
+                     URL INPUT
+                ========================== -->
+                <div class="input-section">
+
+                    <label for="urlInput">
+                        Website URL
+                    </label>
+
+
+                    <div class="url-input-wrapper">
+
+                        <input
+                            type="url"
+                            id="urlInput"
+                            placeholder="https://example.com"
+                            autocomplete="off"
+                        >
+
+
+                        <button
+                            id="analyzeButton"
+                            type="button"
+                        >
+                            Analyze URL
+                        </button>
+
+                    </div>
+
+
+                    <span class="input-help">
+                        The AI engine will analyze URL characteristics
+                        and security indicators.
+                    </span>
+
+                </div>
+
+
+
+                <!-- =========================
+                     ANALYSIS RESULT
+                ========================== -->
+                <div
+                    id="resultContainer"
+                    class="result-container hidden"
+                >
+
+
+                    <!-- RESULT HEADER -->
+                    <div class="result-header">
+
+                        <div>
+
+                            <span class="result-label">
+                                Analysis Result
+                            </span>
+
+
+                            <h2 id="resultStatus">
+                                Waiting for analysis
+                            </h2>
+
+                        </div>
+
+
+                        <div
+                            id="riskBadge"
+                            class="risk-badge"
+                        >
+                            LOW RISK
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- RESULT DETAILS -->
+                    <div class="result-details">
+
+
+                        <!-- RISK SCORE -->
+                        <div class="risk-score">
+
+                            <span>
+                                Risk Score
+                            </span>
+
+
+                            <strong id="riskScore">
+                                0
+                            </strong>
+
+
+                            <small>
+                                /100
+                            </small>
+
+                        </div>
+
+
+
+                        <!-- AI ENGINE -->
+                        <div class="confidence">
+
+                            <span>
+                                AI Engine
+                            </span>
+
+
+                            <strong id="confidenceScore">
+                                DeepSeek AI
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- =========================
+                         AI EXPLANATION
+                    ========================== -->
+                    <div class="explanation">
+
+                        <h3>
+                            AI Explanation
+                        </h3>
+
+
+                        <p id="aiExplanation">
+                            The AI-generated security explanation will
+                            appear here after analysis.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =========================
+                 INFORMATION CARDS
+            ========================== -->
+            <div class="stats-grid">
+
+
+                <!-- URL ANALYSIS -->
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        🔍
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            URL Analysis
+                        </span>
+
+                        <strong>
+                            AI Powered
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- DETECTION ENGINE -->
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        🧠
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Detection Engine
+                        </span>
+
+                        <strong>
+                            Rule Based
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- RISK ASSESSMENT -->
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        📊
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Risk Assessment
+                        </span>
+
+                        <strong>
+                            Real-Time
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =========================
+                 SECURITY INFORMATION
+            ========================== -->
+            <div class="panel">
+
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h2>
+                            What the AI analyzes
+                        </h2>
+
+                        <p>
+                            Multiple security indicators are evaluated
+                            during phishing detection.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="module-grid">
+
+
+                    <!-- URL STRUCTURE -->
+                    <div class="module-card">
+
+                        <div class="module-card-icon">
+                            🔗
+                        </div>
+
+
+                        <h3>
+                            URL Structure
+                        </h3>
+
+
+                        <p>
+                            Examines URL length, domains, special
+                            characters and suspicious patterns.
+                        </p>
+
+                    </div>
+
+
+
+                    <!-- HTTPS SECURITY -->
+                    <div class="module-card">
+
+                        <div class="module-card-icon">
+                            🔐
+                        </div>
+
+
+                        <h3>
+                            HTTPS Security
+                        </h3>
+
+
+                        <p>
+                            Checks whether secure communication is being
+                            used by the website.
+                        </p>
+
+                    </div>
+
+
+
+                    <!-- THREAT INDICATORS -->
+                    <div class="module-card">
+
+                        <div class="module-card-icon">
+                            🎯
+                        </div>
+
+
+                        <h3>
+                            Threat Indicators
+                        </h3>
+
+
+                        <p>
+                            Detects suspicious keywords and patterns
+                            commonly associated with phishing.
+                        </p>
+
+                    </div>
+
+
+
+                    <!-- AI EXPLANATION -->
+                    <div class="module-card">
+
+                        <div class="module-card-icon">
+                            🤖
+                        </div>
+
+
+                        <h3>
+                            AI Explanation
+                        </h3>
+
+
+                        <p>
+                            Generates a human-readable explanation of
+                            the detected security risks.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+    <script src="js/phishing.js"></script>
+
+</body>
+
+</html>

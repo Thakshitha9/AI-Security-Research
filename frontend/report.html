@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Security Report</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        .report-page {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .report-header {
+            margin-bottom: 25px;
+        }
+
+        .report-header h1 {
+            margin-bottom: 8px;
+        }
+
+        .report-header p {
+            color: #777;
+        }
+
+        .report-controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .report-btn {
+            padding: 12px 22px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .generate-btn {
+            background: #2563eb;
+            color: white;
+        }
+
+        .download-btn {
+            background: #16a34a;
+            color: white;
+        }
+
+        .download-btn:disabled,
+        .generate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status-message {
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .status-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-loading {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .report-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            min-height: 300px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+
+        .report-container pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: Arial, sans-serif;
+            line-height: 1.7;
+            font-size: 15px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #888;
+            padding: 80px 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo">
+            AI Security Research
+        </div>
+
+        <div class="nav-links">
+            <a href="index.html">Dashboard</a>
+            <a href="phishing.html">Phishing Detection</a>
+            <a href="prompt-guard.html">Prompt Guard</a>
+            <a href="rag.html">RAG Security AI</a>
+            <a href="recon.html">Recon AI</a>
+            <a href="report.html">Security Report</a>
+        </div>
+    </nav>
+
+    <main class="report-page">
+
+        <div class="report-header">
+            <h1>AI Security Report</h1>
+            <p>
+                Generate a professional defensive cybersecurity report
+                from your Recon AI assessment.
+            </p>
+        </div>
+
+        <div class="report-controls">
+
+            <button
+                id="generateReportBtn"
+                class="report-btn generate-btn"
+                disabled>
+                Generate Security Report
+            </button>
+
+            <button
+                id="downloadReportBtn"
+                class="report-btn download-btn"
+                disabled>
+                Download Report
+            </button>
+
+        </div>
+
+        <div id="statusMessage" class="status-message"></div>
+
+        <section class="report-container">
+
+            <div id="emptyState" class="empty-state">
+                <h2>No Recon Data Available</h2>
+
+                <p>
+                    First perform a Recon AI analysis from the
+                    Recon AI page, then return here to generate
+                    the security report.
+                </p>
+
+                <br>
+
+                <a href="recon.html">
+                    Go to Recon AI
+                </a>
+            </div>
+
+            <pre id="reportContent" style="display:none;"></pre>
+
+        </section>
+
+    </main>
+
+    <script src="js/report.js"></script>
+
+</body>
+</html>

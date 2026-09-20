@@ -1,0 +1,49 @@
+# Environment
+.env
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Reports (generated output)
+reports/**
+!reports/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Additional local environments
+.venv-1/
+.venv-2/
+
+# Sensitive test files
+test_email.txt
+
+# Local environment files
+.env
+.env.*
+
+# Keep an example environment template
+!.env.example
+
+
+
+
+# Ignore generated reports
+reports/**
+!reports/.gitkeep

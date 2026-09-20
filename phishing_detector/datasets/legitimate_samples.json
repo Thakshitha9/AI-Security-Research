@@ -1,0 +1,110 @@
+[
+  {
+    "id": "legit_001",
+    "type": "email",
+    "sender": "noreply@github.com",
+    "subject": "A new sign-in to your GitHub account",
+    "body": "Hey Rares,\n\nA new sign-in was detected on your GitHub account.\n\nDevice: Chrome on Windows\nLocation: Bucharest, Romania\nTime: March 15, 2026 at 2:30 PM EET\n\nIf this was you, no further action is needed.\nIf this wasn't you, please review your security settings: https://github.com/settings/security\n\nThanks,\nThe GitHub Team",
+    "indicators": [],
+    "label": "legitimate"
+  },
+  {
+    "id": "legit_002",
+    "type": "email",
+    "sender": "notifications@linkedin.com",
+    "subject": "You appeared in 12 searches this week",
+    "body": "Hi Rares,\n\nYou appeared in 12 searches this week. See who's looking at your profile.\n\nTop searchers include people from:\n- Tech companies in Bucharest\n- Cybersecurity firms\n\nView all: https://www.linkedin.com/me/search-appearances\n\nLinkedIn",
+    "indicators": [],
+    "label": "legitimate"
+  },
+  {
+    "id": "legit_003",
+    "type": "email",
+    "sender": "order-update@amazon.com",
+    "subject": "Your Amazon order #112-4738291-6639201 has shipped",
+    "body": "Hello Rares,\n\nYour order has shipped and is on its way.\n\nOrder #112-4738291-6639201\nEstimated delivery: March 18-20, 2026\n\nTrack your package:\nhttps://www.amazon.com/gp/your-account/order-details?orderID=112-4738291-6639201\n\nThank you for shopping with us.",
+    "indicators": [],
+    "label": "legitimate"
+  },
+  {
+    "id": "legit_004",
+    "type": "email",
+    "sender": "noreply@google.com",
+    "subject": "Security alert: new device signed in",
+    "body": "Someone just signed in to your Google Account from a new Windows device.\n\nNew sign-in\nDevice: Windows Computer\nLocation: Romania\n\nIf this was you, you can ignore this message.\nIf not, check your account activity: https://myaccount.google.com/notifications\n\nGoogle Security Team",
+    "indicators": [],
+    "label": "legitimate"
+  },
+  {
+    "id": "legit_005",
+    "type": "email",
+    "sender": "team@slack.com",
+    "subject": "Your Slack workspace weekly digest",
+    "body": "Here's what happened in your workspace this week:\n\n- 142 messages sent across 8 channels\n- 3 new channels created\n- 2 new members joined\n\nView your workspace: https://yourteam.slack.com\n\nSlack",
+    "indicators": [],
+    "label": "legitimate"
+  },
+  {
+    "id": "legit_006",
+    "type": "email",
+    "sender": "billing@digitalocean.com",
+    "subject": "Your DigitalOcean invoice for March 2026",
+    "body": "Hi Rares,\n\nYour invoice for March 2026 is ready.\n\nAmount due: $12.00\nDue date: April 1, 2026\n\nView your invoice: https://cloud.digitalocean.com/account/billing\n\nIf you have any questions, contact our support team.\n\nDigitalOcean Billing",
+    "indicators": [],
+    "label": "legitimate"
+  },
+  {
+    "id": "legit_007",
+    "type": "sms",
+    "sender": "REVOLUT",
+    "subject": "",
+    "body": "Your Revolut card ending in 7823 was used for 23.50 EUR at Kaufland. If this wasn't you, freeze your card in the app.",
+    "indicators": [],
+    "label": "legitimate"
+  },
+  {
+    "id": "legit_008",
+    "type": "email",
+    "sender": "no-reply@coursera.org",
+    "subject": "Congratulations! You've completed Introduction to Cybersecurity",
+    "body": "Hi Rares,\n\nCongratulations on completing Introduction to Cybersecurity!\n\nYour certificate is ready to download:\nhttps://www.coursera.org/account/accomplishments/certificate/XXXXX\n\nKeep learning with these recommended courses...\n\nCoursera",
+    "indicators": [],
+    "label": "legitimate"
+  },
+  {
+    "id": "legit_009",
+    "type": "email",
+    "sender": "noreply@steampowered.com",
+    "subject": "Your Steam purchase receipt",
+    "body": "Thank you for your purchase!\n\nGame: Cyberpunk 2077\nPrice: 29.99 EUR\nPayment method: Visa ending in 4921\n\nView your receipt: https://store.steampowered.com/account/history\n\nSteam Support",
+    "indicators": [],
+    "label": "legitimate"
+  },
+  {
+    "id": "legit_010",
+    "type": "email",
+    "sender": "hr@company.com",
+    "subject": "Team meeting tomorrow at 10 AM",
+    "body": "Hi team,\n\nJust a reminder that we have our weekly standup meeting tomorrow at 10 AM in Conference Room B.\n\nAgenda:\n- Sprint review\n- Upcoming deadlines\n- Q&A\n\nPlease come prepared with your updates.\n\nBest,\nHR Team",
+    "indicators": [],
+    "label": "legitimate"
+  },
+  {
+    "id": "legit_011",
+    "type": "sms",
+    "sender": "ING",
+    "subject": "",
+    "body": "ING: Your transfer of 150.00 RON to Alexandru M. was successful. Ref: TRN20260315.",
+    "indicators": [],
+    "label": "legitimate"
+  },
+  {
+    "id": "legit_012",
+    "type": "email",
+    "sender": "support@jetbrains.com",
+    "subject": "Your PyCharm license expires in 30 days",
+    "body": "Hi Rares,\n\nYour PyCharm Professional license will expire on April 15, 2026.\n\nRenew your subscription to continue using all features:\nhttps://account.jetbrains.com/licenses\n\nThank you for using JetBrains products.\n\nJetBrains Team",
+    "indicators": [],
+    "label": "legitimate"
+  }
+]

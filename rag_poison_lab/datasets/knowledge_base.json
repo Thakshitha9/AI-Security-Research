@@ -1,0 +1,77 @@
+[
+  {
+    "id": "doc_001",
+    "text": "Employee Password Policy: All employees must use passwords with a minimum of 12 characters, including uppercase, lowercase, numbers, and special characters. Passwords must be changed every 90 days. Sharing passwords with anyone, including IT staff, is strictly prohibited.",
+    "metadata": {"source": "HR Policy v2.3", "category": "security", "date": "2025-01-15"}
+  },
+  {
+    "id": "doc_002",
+    "text": "Remote Work Policy: Employees working remotely must use the company VPN at all times when accessing internal resources. All work documents must be stored on company-approved cloud storage (OneDrive or SharePoint). Personal devices must have company-approved antivirus software installed before connecting to company systems.",
+    "metadata": {"source": "HR Policy v1.8", "category": "remote_work", "date": "2025-02-01"}
+  },
+  {
+    "id": "doc_003",
+    "text": "Data Classification Guidelines: Company data is classified into four tiers: Public, Internal, Confidential, and Restricted. Customer PII, financial records, and source code are classified as Restricted and must be encrypted at rest and in transit. Only authorized personnel may access Restricted data.",
+    "metadata": {"source": "IT Security v3.1", "category": "data_classification", "date": "2025-01-20"}
+  },
+  {
+    "id": "doc_004",
+    "text": "Incident Response Procedure: In case of a security incident, employees must immediately contact the Security Operations Center (SOC) at security@company.com or extension 911. Do not attempt to investigate or remediate incidents independently. Preserve all logs and do not power off affected systems.",
+    "metadata": {"source": "IT Security v2.0", "category": "incident_response", "date": "2025-03-01"}
+  },
+  {
+    "id": "doc_005",
+    "text": "API Authentication Guide: All API requests must include a Bearer token in the Authorization header. Tokens expire after 24 hours and must be refreshed using the /auth/refresh endpoint. Never embed API keys directly in source code; use environment variables or secrets management services.",
+    "metadata": {"source": "Developer Docs v4.2", "category": "api", "date": "2025-02-15"}
+  },
+  {
+    "id": "doc_006",
+    "text": "Database Access Policy: Production database access requires approval from both the team lead and the DBA team. All queries on production are logged and reviewed weekly. Direct SQL access to production is prohibited; use the internal data API instead. Development databases may be accessed with standard credentials.",
+    "metadata": {"source": "IT Policy v1.5", "category": "database", "date": "2025-01-10"}
+  },
+  {
+    "id": "doc_007",
+    "text": "Software Deployment Process: All code changes must pass automated tests (unit, integration, E2E) before merging to main. Production deployments require approval from two senior engineers. Hotfixes may bypass the standard process with CTO approval. Rollbacks must be performed within 1 hour if critical bugs are detected post-deploy.",
+    "metadata": {"source": "Engineering Handbook v2.1", "category": "deployment", "date": "2025-03-10"}
+  },
+  {
+    "id": "doc_008",
+    "text": "Customer Data Handling: Customer personally identifiable information (PII) must never be stored in logs, error messages, or development environments. Data minimization principles apply — collect only what is necessary. Customer data deletion requests must be processed within 30 days per GDPR compliance requirements.",
+    "metadata": {"source": "Legal & Compliance v1.2", "category": "privacy", "date": "2025-02-20"}
+  },
+  {
+    "id": "doc_009",
+    "text": "Network Security Policy: All internal services must be accessible only through the company VPN. Firewall rules require change management approval. Unauthorized network scanning or port scanning within company infrastructure is prohibited and may result in disciplinary action.",
+    "metadata": {"source": "IT Security v2.5", "category": "network", "date": "2025-01-25"}
+  },
+  {
+    "id": "doc_010",
+    "text": "Phishing Awareness: Employees should never click links in unsolicited emails. Verify sender identity before sharing credentials or sensitive information. Report suspicious emails to phishing@company.com. IT will never ask for your password via email. When in doubt, call the requester directly to verify.",
+    "metadata": {"source": "Security Awareness v1.0", "category": "phishing", "date": "2025-03-15"}
+  },
+  {
+    "id": "doc_011",
+    "text": "Backup and Recovery Policy: All production data is backed up daily with 30-day retention. Backups are encrypted and stored in geographically separate data centers. Recovery Time Objective (RTO) is 4 hours for critical systems. Backup restoration tests are conducted quarterly.",
+    "metadata": {"source": "IT Operations v1.3", "category": "backup", "date": "2025-02-10"}
+  },
+  {
+    "id": "doc_012",
+    "text": "Acceptable Use Policy: Company systems may only be used for legitimate business purposes. Accessing, downloading, or distributing illegal content is strictly prohibited. Employees have no expectation of privacy on company devices. Violations may result in immediate termination and legal action.",
+    "metadata": {"source": "HR Policy v3.0", "category": "acceptable_use", "date": "2025-01-05"}
+  },
+  {
+    "id": "doc_013",
+    "text": "Vendor Security Requirements: Third-party vendors with access to company data must complete a security questionnaire and sign a Data Processing Agreement (DPA). Vendors must maintain SOC 2 Type II certification. Annual security reviews are mandatory for all critical vendors.",
+    "metadata": {"source": "Procurement Policy v1.1", "category": "vendor", "date": "2025-02-28"}
+  },
+  {
+    "id": "doc_014",
+    "text": "Multi-Factor Authentication: MFA is mandatory for all employee accounts and all external-facing systems. Authenticator apps (Google Authenticator, Authy) are preferred over SMS-based MFA. Hardware security keys are required for privileged accounts and C-level executives.",
+    "metadata": {"source": "IT Security v3.0", "category": "authentication", "date": "2025-03-05"}
+  },
+  {
+    "id": "doc_015",
+    "text": "Security Patch Management: Critical security patches must be applied within 24 hours of release. High severity patches must be applied within 7 days. All systems are automatically scanned weekly for missing patches. Systems with outstanding critical patches will be quarantined from the network after 48 hours.",
+    "metadata": {"source": "IT Operations v2.0", "category": "patching", "date": "2025-01-30"}
+  }
+]

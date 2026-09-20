@@ -1,0 +1,110 @@
+[
+  {
+    "id": "phish_001",
+    "type": "email",
+    "sender": "security@bankk-verify.com",
+    "subject": "Urgent: Your Account Has Been Suspended",
+    "body": "Dear Valued Customer,\n\nWe have detected suspicious activity on your account. Your account has been temporarily suspended for security purposes.\n\nTo restore access, please verify your identity immediately by clicking the link below:\n\nhttp://bankk-verify.com/restore-account\n\nFailure to verify within 24 hours will result in permanent account closure.\n\nSincerely,\nBank Security Team",
+    "indicators": ["urgency", "misspelled_domain", "generic_greeting", "threatening_deadline", "suspicious_link"],
+    "label": "phishing"
+  },
+  {
+    "id": "phish_002",
+    "type": "email",
+    "sender": "it-support@company-helpdesk.net",
+    "subject": "Password Expires Today - Immediate Action Required",
+    "body": "Hello,\n\nYour company email password expires today. To avoid losing access to your account, please update your password immediately using the secure portal below:\n\nhttp://company-helpdesk.net/password-reset\n\nThis is an automated message from IT Support.\nDo not reply to this email.",
+    "indicators": ["urgency", "external_domain", "password_request", "impersonation"],
+    "label": "phishing"
+  },
+  {
+    "id": "phish_003",
+    "type": "sms",
+    "sender": "+1-555-0199",
+    "subject": "",
+    "body": "ALERT: Your package could not be delivered. Confirm your address to reschedule: http://tracking-pkg.info/confirm?id=8847261",
+    "indicators": ["urgency", "suspicious_link", "short_url", "unsolicited"],
+    "label": "phishing"
+  },
+  {
+    "id": "phish_004",
+    "type": "email",
+    "sender": "ceo@company-group.org",
+    "subject": "Urgent Wire Transfer Needed",
+    "body": "Hi,\n\nI need you to process an urgent wire transfer of $45,000 to a vendor. This is time-sensitive and confidential.\n\nPlease use the following account details:\nBank: First National\nAccount: 9283746510\nRouting: 021000021\n\nConfirm once done. Do not discuss this with anyone else.\n\nThanks,\nJohn (CEO)",
+    "indicators": ["ceo_fraud", "urgency", "secrecy_request", "wire_transfer", "external_domain"],
+    "label": "phishing"
+  },
+  {
+    "id": "phish_005",
+    "type": "email",
+    "sender": "noreply@amazzon-orders.com",
+    "subject": "Your Order #AMZ-9847231 Has Been Charged",
+    "body": "Your Amazon account has been charged $899.99 for Order #AMZ-9847231 (MacBook Pro 16\").\n\nIf you did not make this purchase, click here to dispute and request a refund:\nhttp://amazzon-orders.com/dispute\n\nYou must respond within 48 hours or the charge will be finalized.\n\nAmazon Customer Service",
+    "indicators": ["misspelled_domain", "fake_charge", "urgency", "threatening_deadline", "suspicious_link"],
+    "label": "phishing"
+  },
+  {
+    "id": "phish_006",
+    "type": "email",
+    "sender": "helpdesk@microsoft-verify.net",
+    "subject": "Unusual Sign-in Activity on Your Microsoft Account",
+    "body": "We detected a sign-in from an unrecognized device:\n\nLocation: Moscow, Russia\nDevice: Unknown Linux Device\nTime: Today at 3:42 AM\n\nIf this wasn't you, secure your account immediately:\nhttp://microsoft-verify.net/secure-account\n\nMicrosoft Account Security",
+    "indicators": ["impersonation", "fear_tactic", "external_domain", "suspicious_link"],
+    "label": "phishing"
+  },
+  {
+    "id": "phish_007",
+    "type": "sms",
+    "sender": "TAXOFFICE",
+    "subject": "",
+    "body": "HM Revenue: You are owed a tax refund of 847.50 GBP. Claim now before it expires: http://hmrc-refunds.co/claim/7742",
+    "indicators": ["financial_lure", "government_impersonation", "urgency", "suspicious_link"],
+    "label": "phishing"
+  },
+  {
+    "id": "phish_008",
+    "type": "email",
+    "sender": "admin@sharepoint-docs.net",
+    "subject": "Document Shared With You: Q4_Financial_Report.xlsx",
+    "body": "A document has been shared with you via SharePoint.\n\nClick below to view Q4_Financial_Report.xlsx:\nhttp://sharepoint-docs.net/view/doc?id=38291\n\nThis link expires in 2 hours.\n\nSharePoint Online",
+    "indicators": ["impersonation", "external_domain", "urgency", "document_lure"],
+    "label": "phishing"
+  },
+  {
+    "id": "phish_009",
+    "type": "email",
+    "sender": "hr@company-benefits.org",
+    "subject": "Action Required: Update Your Direct Deposit Information",
+    "body": "Dear Employee,\n\nDue to a system migration, all employees must re-enter their direct deposit information by end of day Friday.\n\nUpdate your banking details here:\nhttp://company-benefits.org/payroll-update\n\nFailure to update will delay your next paycheck.\n\nHR Department",
+    "indicators": ["impersonation", "urgency", "financial_data_request", "external_domain", "threatening_deadline"],
+    "label": "phishing"
+  },
+  {
+    "id": "phish_010",
+    "type": "email",
+    "sender": "support@netfllix-billing.com",
+    "subject": "Payment Failed - Your Netflix Account Will Be Cancelled",
+    "body": "We were unable to process your payment for the current billing cycle.\n\nTo avoid account cancellation, please update your payment method within 24 hours:\nhttp://netfllix-billing.com/update-payment\n\nNetflix Support Team",
+    "indicators": ["misspelled_domain", "urgency", "threatening_deadline", "payment_request", "suspicious_link"],
+    "label": "phishing"
+  },
+  {
+    "id": "phish_011",
+    "type": "email",
+    "sender": "security@paypa1-alert.com",
+    "subject": "Your PayPal Account Has Been Limited",
+    "body": "We've limited your account due to suspicious activity.\n\nPlease log in to restore full access:\nhttp://paypa1-alert.com/resolve\n\nIf not resolved in 72 hours, your account will be permanently restricted.\n\nPayPal Security",
+    "indicators": ["homoglyph_domain", "urgency", "account_threat", "suspicious_link", "impersonation"],
+    "label": "phishing"
+  },
+  {
+    "id": "phish_012",
+    "type": "sms",
+    "sender": "+44-7700-900123",
+    "subject": "",
+    "body": "Your bank card ending in 4921 has been blocked due to fraud. Call 0800-555-0123 immediately to unblock.",
+    "indicators": ["urgency", "fear_tactic", "fake_phone_number", "unsolicited"],
+    "label": "phishing"
+  }
+]

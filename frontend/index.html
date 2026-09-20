@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Security Platform</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                🛡
+            </div>
+
+            <div>
+                <h2>AI Security</h2>
+                <span>Security Platform</span>
+            </div>
+
+        </div>
+
+
+        <nav class="navigation">
+
+            <p class="nav-title">
+                MAIN
+            </p>
+
+
+            <a href="index.html" class="nav-item active">
+                <span>▦</span>
+                Dashboard
+            </a>
+
+
+            <a href="phishing.html" class="nav-item">
+                <span>◉</span>
+                Phishing Detection
+            </a>
+
+
+            <a href="#" class="nav-item">
+                <span>◈</span>
+                RAG Assistant
+            </a>
+
+
+            <a href="#" class="nav-item">
+                <span>⚠</span>
+                Prompt Guard
+            </a>
+
+
+            <a href="#" class="nav-item">
+                <span>⌁</span>
+                Recon AI
+            </a>
+
+
+            <p class="nav-title">
+                SECURITY
+            </p>
+
+
+            <a href="#" class="nav-item">
+                <span>◫</span>
+                Security Reports
+            </a>
+
+
+            <a href="#" class="nav-item">
+                <span>◉</span>
+                Honeypot
+            </a>
+
+
+            <a href="#" class="nav-item">
+                <span>◌</span>
+                Activity Logs
+            </a>
+
+
+            <p class="nav-title">
+                SYSTEM
+            </p>
+
+
+            <a href="#" class="nav-item">
+                <span>⚙</span>
+                Settings
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+            <div class="system-status">
+
+                <span class="status-dot"></span>
+
+                <div>
+
+                    <strong>
+                        System Secure
+                    </strong>
+
+                    <small>
+                        All services operational
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================== -->
+
+    <main class="main-content">
+
+
+        <!-- TOP BAR -->
+
+        <header class="topbar">
+
+            <div>
+
+                <h1>
+                    Security Overview
+                </h1>
+
+                <p>
+                    Monitor your AI security environment
+                </p>
+
+            </div>
+
+
+            <div class="topbar-right">
+
+                <div class="api-status">
+
+                    <span class="status-dot"></span>
+
+                    AI Engine Online
+
+                </div>
+
+
+                <div class="user-profile">
+
+                    <div class="avatar">
+                        ST
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Security Admin
+                        </strong>
+
+                        <small>
+                            Administrator
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- =========================
+             DASHBOARD
+        ========================== -->
+
+        <section class="dashboard">
+
+
+            <!-- WELCOME -->
+
+            <div class="welcome-card">
+
+                <div>
+
+                    <span class="eyebrow">
+                        AI-POWERED SECURITY
+                    </span>
+
+
+                    <h2>
+                        Security Operations Center
+                    </h2>
+
+
+                    <p>
+                        Detect phishing, analyze threats, protect AI systems,
+                        and monitor security activity from one platform.
+                    </p>
+
+                </div>
+
+
+                <div class="shield-large">
+                    🛡
+                </div>
+
+            </div>
+
+
+
+            <!-- =========================
+                 LIVE STATISTICS
+            ========================== -->
+
+            <div class="stats-grid">
+
+
+                <!-- PHISHING -->
+
+                <div class="stat-card">
+
+                    <div class="stat-icon phishing-icon">
+                        ◉
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Phishing Detected
+                        </span>
+
+
+                        <h3 id="phishingDetected">
+                            0
+                        </h3>
+
+
+                        <small class="danger-text">
+                            Risk Score ≥ 70
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- TOTAL SCANS -->
+
+                <div class="stat-card">
+
+                    <div class="stat-icon scan-icon">
+                        ⌁
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Security Scans
+                        </span>
+
+
+                        <h3 id="securityScans">
+                            0
+                        </h3>
+
+
+                        <small class="success-text">
+                            Total URL analyses
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- MEDIUM RISK -->
+
+                <div class="stat-card">
+
+                    <div class="stat-icon block-icon">
+                        ⚠
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Medium Risk
+                        </span>
+
+
+                        <h3 id="mediumRisk">
+                            0
+                        </h3>
+
+
+                        <small class="success-text">
+                            Risk Score 40–69
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- AVERAGE SCORE -->
+
+                <div class="stat-card">
+
+                    <div class="stat-icon risk-icon">
+                        ◈
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Average Risk Score
+                        </span>
+
+
+                        <h3>
+
+                            <span id="averageRiskScore">
+                                0
+                            </span>
+
+                            <span class="score-unit">
+                                /100
+                            </span>
+
+                        </h3>
+
+
+                        <small class="success-text">
+                            Based on all analyses
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =========================
+                 MAIN GRID
+            ========================== -->
+
+            <div class="content-grid">
+
+
+                <!-- SECURITY ACTIVITY -->
+
+                <div class="panel activity-panel">
+
+
+                    <div class="panel-header">
+
+                        <div>
+
+                            <h3>
+                                Recent Security Activity
+                            </h3>
+
+                            <p>
+                                Latest URL analyses detected by the platform
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            class="view-button"
+                            id="viewAllButton"
+                            type="button"
+                        >
+                            View All
+                        </button>
+
+                    </div>
+
+
+
+                    <!-- Dynamic activity list -->
+
+                    <div
+                        class="activity-list"
+                        id="activityList"
+                    >
+
+                        <div class="activity-item">
+
+                            <div class="activity-info">
+
+                                <strong>
+                                    Loading security activity...
+                                </strong>
+
+                                <span>
+                                    Fetching data from MySQL
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- SECURITY MODULES -->
+
+                <div class="panel modules-panel">
+
+
+                    <div class="panel-header">
+
+                        <div>
+
+                            <h3>
+                                Security Modules
+                            </h3>
+
+                            <p>
+                                Platform services
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="module-list">
+
+
+                        <!-- PHISHING -->
+
+                        <div class="module-item">
+
+                            <div class="module-icon">
+                                ◉
+                            </div>
+
+
+                            <div>
+
+                                <strong>
+                                    Phishing Detection
+                                </strong>
+
+                                <span>
+                                    AI URL Analysis
+                                </span>
+
+                            </div>
+
+
+                            <span class="module-status online">
+                                Online
+                            </span>
+
+                        </div>
+
+
+
+                        <!-- RAG -->
+
+                        <div class="module-item">
+
+                            <div class="module-icon">
+                                ◈
+                            </div>
+
+
+                            <div>
+
+                                <strong>
+                                    RAG Assistant
+                                </strong>
+
+                                <span>
+                                    Knowledge Security
+                                </span>
+
+                            </div>
+
+
+                            <span class="module-status online">
+                                Online
+                            </span>
+
+                        </div>
+
+
+
+                        <!-- PROMPT GUARD -->
+
+                        <div class="module-item">
+
+                            <div class="module-icon">
+                                ⚠
+                            </div>
+
+
+                            <div>
+
+                                <strong>
+                                    Prompt Guard
+                                </strong>
+
+                                <span>
+                                    AI Protection
+                                </span>
+
+                            </div>
+
+
+                            <span class="module-status online">
+                                Online
+                            </span>
+
+                        </div>
+
+
+
+                        <!-- RECON -->
+
+                        <div class="module-item">
+
+                            <div class="module-icon">
+                                ⌁
+                            </div>
+
+
+                            <div>
+
+                                <strong>
+                                    Recon AI
+                                </strong>
+
+                                <span>
+                                    Network Analysis
+                                </span>
+
+                            </div>
+
+
+                            <span class="module-status online">
+                                Online
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =========================
+                 QUICK ACTIONS
+            ========================== -->
+
+            <div class="panel quick-panel">
+
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h3>
+                            Quick Security Actions
+                        </h3>
+
+                        <p>
+                            Start a security analysis
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="quick-actions">
+
+
+                    <button
+                        class="quick-action"
+                        type="button"
+                        onclick="window.location.href='phishing.html'"
+                    >
+
+                        <span>
+                            ◉
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                Check Phishing
+                            </strong>
+
+                            <small>
+                                Analyze an email or URL
+                            </small>
+
+                        </div>
+
+                    </button>
+
+
+
+                    <button
+                        class="quick-action"
+                        type="button"
+                    >
+
+                        <span>
+                            ⌁
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                Network Scan
+                            </strong>
+
+                            <small>
+                                Analyze Nmap results
+                            </small>
+
+                        </div>
+
+                    </button>
+
+
+
+                    <button
+                        class="quick-action"
+                        type="button"
+                    >
+
+                        <span>
+                            ⚠
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                Scan Prompt
+                            </strong>
+
+                            <small>
+                                Detect prompt injection
+                            </small>
+
+                        </div>
+
+                    </button>
+
+
+
+                    <button
+                        class="quick-action"
+                        type="button"
+                    >
+
+                        <span>
+                            ◈
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                Ask Security AI
+                            </strong>
+
+                            <small>
+                                Query the RAG knowledge base
+                            </small>
+
+                        </div>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- Dashboard JavaScript -->
+
+    <script src="js/app.js"></script>
+
+    <script>
+
+        async function loadDashboardStats() {
+
+            try {
+
+                const response = await fetch(
+                    "http://127.0.0.1:5000/api/dashboard/stats"
+                );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Unable to load dashboard statistics"
+                    );
+
+                }
+
+
+                const data = await response.json();
+
+
+                // ---------------------------------
+                // Calculate average risk score
+                // ---------------------------------
+
+                let averageRiskScore = 0;
+
+
+                if (data.recent_analyses &&
+                    data.recent_analyses.length > 0) {
+
+                    const totalRisk =
+                        data.recent_analyses.reduce(
+                            (sum, item) =>
+                                sum + item.risk_score,
+                            0
+                        );
+
+                    averageRiskScore =
+                        Math.round(
+                            totalRisk /
+                            data.recent_analyses.length
+                        );
+                }
+
+
+                // ---------------------------------
+                // Update statistics
+                // ---------------------------------
+
+                document.getElementById(
+                    "phishingDetected"
+                ).textContent = data.high_risk;
+
+
+                document.getElementById(
+                    "securityScans"
+                ).textContent = data.total;
+
+
+                document.getElementById(
+                    "mediumRisk"
+                ).textContent = data.medium_risk;
+
+
+                document.getElementById(
+                    "averageRiskScore"
+                ).textContent = averageRiskScore;
+
+
+                // ---------------------------------
+                // Recent activity
+                // ---------------------------------
+
+                const activityList =
+                    document.getElementById(
+                        "activityList"
+                    );
+
+
+                activityList.innerHTML = "";
+
+
+                if (!data.recent_analyses ||
+                    data.recent_analyses.length === 0) {
+
+                    activityList.innerHTML = `
+                        <div class="activity-item">
+
+                            <div class="activity-info">
+
+                                <strong>
+                                    No security activity yet
+                                </strong>
+
+                                <span>
+                                    Analyze a URL to create an activity record.
+                                </span>
+
+                            </div>
+
+                        </div>
+                    `;
+
+                    return;
+                }
+
+
+                data.recent_analyses.forEach(
+                    function (item) {
+
+                        let riskClass = "low";
+                        let riskLabel = "LOW";
+
+                        if (item.risk_score >= 70) {
+
+                            riskClass = "high";
+                            riskLabel = "HIGH";
+
+                        } else if (item.risk_score >= 40) {
+
+                            riskClass = "medium";
+                            riskLabel = "MEDIUM";
+                        }
+
+
+                        const activityItem =
+                            document.createElement("div");
+
+
+                        activityItem.className =
+                            "activity-item";
+
+
+                        activityItem.innerHTML = `
+
+                            <div class="activity-icon ${riskClass}">
+                                ${item.risk_score >= 70 ? "◉" : "⚠"}
+                            </div>
+
+
+                            <div class="activity-info">
+
+                                <strong>
+                                    URL Security Analysis
+                                </strong>
+
+                                <span>
+                                    ${item.url}
+                                </span>
+
+                            </div>
+
+
+                            <span class="badge ${riskClass}">
+                                ${riskLabel}
+                            </span>
+
+
+                            <time>
+                                ${new Date(item.created_at).toLocaleString()}
+                            </time>
+
+                        `;
+
+
+                        activityList.appendChild(
+                            activityItem
+                        );
+
+                    }
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Dashboard error:",
+                    error
+                );
+
+
+                document.getElementById(
+                    "activityList"
+                ).innerHTML = `
+
+                    <div class="activity-item">
+
+                        <div class="activity-info">
+
+                            <strong>
+                                Dashboard API unavailable
+                            </strong>
+
+                            <span>
+                                Make sure Flask is running on port 5000.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+
+        }
+
+
+        // Load dashboard when page opens
+
+        loadDashboardStats();
+
+    </script>
+
+
+</body>
+
+</html>
