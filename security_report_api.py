@@ -1,15 +1,14 @@
 
 from flask import Flask, request, jsonify
-from flask_cors import CORS
 
 from core.llm_client import LLMClient
 from core.config import LLMProvider
+from core.platform import MAX_REPORT_CHARS, install_api_guards
 
 from pathlib import Path
 from datetime import datetime
 import json
 import re
-import traceback
 import time
 
 
@@ -18,7 +17,7 @@ import time
 # ============================================================
 
 app = Flask(__name__)
-CORS(app)
+install_api_guards(app, max_bytes=MAX_REPORT_CHARS + 50_000)
 
 REPORTS_DIR = Path("reports/security")
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -449,7 +448,7 @@ def generate_section_with_fallback(
 
             print(
                 f"    AI error for {title}, attempt {attempt}: "
-                f"{type(error).__name__}: {error}",
+                f"{type(error).__name__}",
                 flush=True
             )
 
@@ -466,7 +465,7 @@ def generate_section_with_fallback(
 
         print(
             f"    Last error for {title}: "
-            f"{type(last_error).__name__}: {last_error}",
+            f"{type(last_error).__name__}",
             flush=True
         )
 
@@ -479,6 +478,324 @@ def generate_section_with_fallback(
 # ============================================================
 # GENERATE COMPLETE REPORT
 # ============================================================
+
+def _clip(value, limit=500):
+    text = "" if value is None else str(value).strip()
+    return text[:limit]
+
+
+def _plain(value):
+    """Return supplied text without a per-field character limit.
+
+    Descriptions, evidence, and recommendations are preserved in full.
+    The generate endpoint rejects a JSON body larger than MAX_REPORT_CHARS.
+    That request limit is the stability bound. These fields are not clipped.
+    """
+
+    if value is None:
+        return ""
+    return str(value).strip()
+
+
+def _risk_label(value, score=None):
+    label = _clip(value, 32).upper()
+
+    if label in {"CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"}:
+        return label
+
+    try:
+        number = int(score)
+    except (TypeError, ValueError):
+        return "UNKNOWN"
+
+    if number >= 70:
+        return "HIGH"
+    if number >= 40:
+        return "MEDIUM"
+    if number > 0:
+        return "LOW"
+    return "INFO"
+
+
+def _severity_counts(rows):
+    counts = {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "MEDIUM": 0,
+        "LOW": 0,
+        "INFO": 0,
+    }
+
+    for row in rows:
+        label = row.get("severity")
+        if label in counts:
+            counts[label] += 1
+
+    return counts
+
+
+def _highest_risk(labels):
+    order = {"CRITICAL": 5, "HIGH": 4, "MEDIUM": 3, "LOW": 2, "INFO": 1}
+    best = "UNKNOWN"
+
+    for label in labels:
+        if order.get(label, 0) > order.get(best, 0):
+            best = label
+
+    return best
+
+
+def _host_target(host):
+    address = _clip(
+        host.get("ip") or host.get("address") or host.get("host"),
+        128,
+    ) or "Unknown host"
+    hostname = _clip(host.get("hostname"), 128)
+    if hostname:
+        return f"{address} ({hostname})"
+    return address
+
+
+def _collect_findings(scan_data):
+    """Return targets, finding rows, host-list presence, and empty hosts.
+
+    An empty findings list stays an empty assessment result. It is not
+    turned into a security finding.
+    """
+
+    hosts = scan_data.get("hosts") if isinstance(scan_data, dict) else None
+    hosts_present = isinstance(hosts, list)
+    if not hosts_present:
+        hosts = []
+
+    targets = []
+    rows = []
+    hosts_without_findings = []
+
+    for host in hosts:
+        if not isinstance(host, dict):
+            continue
+
+        target = _host_target(host)
+        targets.append(target)
+        findings = host.get("findings")
+        host_rows = []
+
+        if isinstance(findings, list):
+            for finding in findings:
+                if not isinstance(finding, dict):
+                    continue
+
+                port = _plain(finding.get("port")) or "Not provided"
+                service = _plain(finding.get("service")) or "Not provided"
+                detail = _plain(
+                    finding.get("description") or finding.get("finding"),
+                ) or "No finding text was returned."
+                recommendation = _plain(
+                    finding.get("recommendation"),
+                ) or "No recommendation was returned."
+                observed = f"Port {port} / {service}"
+                evidence = _plain(finding.get("evidence")) or observed
+
+                host_rows.append({
+                    "title": observed,
+                    "target": target,
+                    "severity": _risk_label(
+                        finding.get("risk_level"),
+                        finding.get("risk_score"),
+                    ),
+                    "evidence": evidence,
+                    "recommendation": recommendation,
+                    "detail": detail,
+                })
+
+        if host_rows:
+            rows.extend(host_rows)
+        else:
+            hosts_without_findings.append(target)
+
+    return targets, rows, hosts_present, hosts_without_findings
+
+
+def _empty_findings_note(hosts_without_findings):
+    """Status text for hosts that were assessed and had no findings."""
+
+    if not hosts_without_findings:
+        return ""
+
+    listed = ", ".join(hosts_without_findings)
+    return (
+        "Hosts assessed with no findings: "
+        f"{listed}. An empty findings list is an empty assessment result "
+        "and is not a discovered security finding."
+    )
+
+
+def build_report_package(scan_data):
+    """Markdown and display fields from supplied findings only."""
+
+    targets, rows, hosts_present, hosts_without_findings = _collect_findings(
+        scan_data
+    )
+    timestamp = datetime.now().isoformat(timespec="seconds")
+    overall = _highest_risk(row["severity"] for row in rows)
+    target_text = ", ".join(targets[:8]) if targets else (
+        "Not provided in the assessment data."
+    )
+    if len(targets) > 8:
+        target_text += f", and {len(targets) - 8} more"
+
+    if not hosts_present:
+        assessment_status = "incomplete"
+        summary = (
+            "The supplied assessment is incomplete. "
+            "It did not include a host list."
+        )
+    elif not targets:
+        assessment_status = "completed"
+        summary = (
+            "The assessment completed and did not include any hosts."
+        )
+    elif not rows:
+        assessment_status = "completed"
+        summary = (
+            f"The assessment completed for {len(targets)} host(s) and "
+            "did not include any findings."
+        )
+    else:
+        assessment_status = "completed"
+        summary = (
+            f"The assessment completed for {len(targets)} host(s) and "
+            f"lists {len(rows)} finding(s) from the supplied data. "
+            f"The highest risk label in that data is {overall}."
+        )
+
+    limitations = [
+        "Only hosts, services, risk labels, and recommendations present in the supplied assessment are listed.",
+        "These observations do not prove that a system was compromised.",
+        "The AI-generated narrative is separate from this factual assessment and may be unavailable.",
+    ]
+
+    finding_blocks = []
+    evidence_lines = []
+    recommendation_lines = []
+
+    for index, row in enumerate(rows, start=1):
+        finding_blocks.append(
+            "\n".join([
+                f"### {index}. {row['title']}",
+                f"- Target: {row['target']}",
+                f"- Severity: {row['severity']}",
+                f"- Finding: {row['detail']}",
+                f"- Evidence: {row['evidence']}",
+                f"- Recommendation: {row['recommendation']}",
+            ])
+        )
+        evidence_lines.append(f"- {index}. {row['target']}: {row['evidence']}")
+        recommendation_lines.append(
+            f"- {index}. {row['target']}: {row['recommendation']}"
+        )
+
+    severity_counts = _severity_counts(rows)
+    finding_count = len(rows)
+    count_lines = [
+        f"- Critical: {severity_counts['CRITICAL']}",
+        f"- High: {severity_counts['HIGH']}",
+        f"- Medium: {severity_counts['MEDIUM']}",
+        f"- Low: {severity_counts['LOW']}",
+        f"- Informational: {severity_counts['INFO']}",
+        f"- Findings: {finding_count}",
+    ]
+
+    note = _empty_findings_note(hosts_without_findings)
+
+    if rows:
+        findings_text = "\n\n".join(finding_blocks)
+        evidence_text = "\n".join(evidence_lines)
+        recommendation_text = "\n".join(recommendation_lines)
+    else:
+        findings_text = "No findings were present in the supplied assessment."
+        evidence_text = "No evidence was present in the supplied assessment."
+        recommendation_text = "No recommendations were returned."
+
+    if note:
+        findings_text = f"{findings_text}\n\n{note}"
+
+    markdown = "\n".join([
+        "# Defensive Security Report",
+        "",
+        "## Executive Summary",
+        "",
+        summary,
+        "",
+        "## Assessment Details",
+        "",
+        "- Module: Recon AI",
+        f"- Target: {target_text}",
+        f"- Assessment: {assessment_status}",
+        "- Report: generated",
+        "",
+        "## Risk Level",
+        "",
+        overall,
+        "",
+        "## Finding summary",
+        "",
+        "\n".join(count_lines),
+        "",
+        "## Findings",
+        "",
+        findings_text,
+        "",
+        "## Evidence",
+        "",
+        evidence_text,
+        "",
+        "## Recommendations",
+        "",
+        recommendation_text,
+        "",
+        "## Limitations",
+        "",
+        "\n".join(f"- {item}" for item in limitations),
+        "",
+        "## Timestamp",
+        "",
+        timestamp,
+        "",
+    ])
+
+    return {
+        "markdown": markdown,
+        "view": {
+            "module": "Recon AI",
+            "target": target_text,
+            "assessment_status": assessment_status,
+            "report_status": "generated",
+            "risk_level": overall,
+            "summary": summary,
+            "timestamp": timestamp,
+            "finding_count": finding_count,
+            "severity_counts": severity_counts,
+            "findings": rows,
+            "hosts_without_findings": hosts_without_findings,
+            "finding_status": note,
+            "evidence": evidence_lines or [
+                "No evidence was present in the supplied assessment."
+            ],
+            "recommendations": recommendation_lines or [
+                "No recommendations were returned."
+            ],
+            "limitations": limitations,
+        },
+    }
+
+
+def build_factual_report(scan_data):
+    """Build a report from supplied findings only. No model text is copied."""
+
+    return build_report_package(scan_data)["markdown"]
+
 
 def generate_security_report(client, scan_data):
 
@@ -551,6 +868,38 @@ def validate_report(report):
     }
 
 
+FACTUAL_SECTIONS = (
+    "Executive Summary",
+    "Assessment Details",
+    "Risk Level",
+    "Finding summary",
+    "Findings",
+    "Evidence",
+    "Recommendations",
+    "Limitations",
+    "Timestamp",
+)
+
+
+def factual_report_status(markdown, assessment_status):
+    """Factual completeness does not depend on the model narrative.
+
+    The assessment is factually complete when a host list was supplied and
+    every factual section is present. Narrative availability stays on
+    narrative_status.
+    """
+
+    missing = [
+        title for title in FACTUAL_SECTIONS
+        if f"## {title}" not in markdown
+    ]
+
+    if assessment_status != "completed":
+        missing.append("host list")
+
+    return not missing, missing
+
+
 # ============================================================
 # GENERATE REPORT ENDPOINT
 # ============================================================
@@ -570,9 +919,32 @@ def generate_report():
             "error": "Valid Recon assessment data is required."
         }), 400
 
+    try:
+        encoded = json.dumps(data)
+    except (TypeError, ValueError):
+        return jsonify({
+            "status": "error",
+            "error": "Assessment data must be JSON."
+        }), 400
+
+    if len(encoded) > MAX_REPORT_CHARS:
+        return jsonify({
+            "status": "error",
+            "error": "Assessment data is too large."
+        }), 400
+
     print(
         "Received security report request.",
         flush=True
+    )
+
+    package = build_report_package(data)
+    factual = package["markdown"]
+    narrative = ""
+    narrative_status = "unavailable"
+    message = (
+        "AI-generated narrative was unavailable. "
+        "The factual security assessment is shown below."
     )
 
     try:
@@ -584,80 +956,66 @@ def generate_report():
 
         with LLMClient(LLMProvider.GEMINI) as llm:
 
-            report = generate_security_report(
+            narrative = generate_security_report(
                 client=llm,
                 scan_data=data
             )
 
-        validation = validate_report(report)
-
-        timestamp = datetime.now().strftime(
-            "%Y%m%d_%H%M%S"
+        narrative_status = "available"
+        message = (
+            "Security report generated. "
+            "The AI-generated narrative is included after the factual assessment."
         )
 
-        filename = f"security_report_{timestamp}.md"
+    except Exception:
+        print("SECURITY REPORT ERROR", flush=True)
 
-        report_path = REPORTS_DIR / filename
+    if narrative:
+        report = (
+            factual
+            + "\n## AI-generated narrative\n\n"
+            + narrative
+        )
+    else:
+        report = factual
+    factual_complete, factual_missing = factual_report_status(
+        factual,
+        package["view"]["assessment_status"],
+    )
 
+    timestamp = datetime.now().strftime(
+        "%Y%m%d_%H%M%S"
+    )
+
+    filename = f"security_report_{timestamp}.md"
+    report_path = REPORTS_DIR / filename
+
+    try:
         report_path.write_text(
             report,
             encoding="utf-8"
         )
+        print("Report saved successfully.", flush=True)
+    except Exception:
+        print("SECURITY REPORT SAVE ERROR", flush=True)
+        filename = ""
 
-        print(
-            f"Report saved successfully: {report_path}",
-            flush=True
-        )
+    view = package["view"]
+    view["narrative_status"] = narrative_status
 
-        print(
-            f"Report complete: {validation['complete']}",
-            flush=True
-        )
-
-        if validation["missing_sections"]:
-
-            print(
-                "Missing sections:",
-                validation["missing_sections"],
-                flush=True
-            )
-
-        return jsonify({
-            "status": "success",
-            "message": "Security report generated successfully.",
-            "filename": filename,
-            "report": report,
-            "complete": validation["complete"],
-            "missing_sections": validation["missing_sections"]
-        }), 200
-
-    except Exception as error:
-
-        print(
-            "\nSECURITY REPORT ERROR",
-            flush=True
-        )
-
-        print(
-            f"Error type: {type(error).__name__}",
-            flush=True
-        )
-
-        print(
-            f"Error message: {error}",
-            flush=True
-        )
-
-        traceback.print_exc()
-
-        return jsonify({
-            "status": "error",
-            "error": (
-                "Security report generation failed. "
-                "Check the security_report_api.py terminal."
-            ),
-            "error_type": type(error).__name__
-        }), 500
+    return jsonify({
+        "status": "success",
+        "message": message,
+        "assessment_status": view["assessment_status"],
+        "report_status": "generated",
+        "narrative_status": narrative_status,
+        "filename": filename,
+        "report": report,
+        "view": view,
+        "complete": factual_complete,
+        "factual_complete": factual_complete,
+        "missing_sections": factual_missing
+    }), 200
 
 
 # ============================================================
