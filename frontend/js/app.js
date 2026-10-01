@@ -8,56 +8,31 @@ const navItems = document.querySelectorAll(".nav-item");
 
 navItems.forEach((item) => {
     item.addEventListener("click", function (event) {
+        const href = item.getAttribute("href");
+
+        if (href && href !== "#") {
+            return;
+        }
+
         event.preventDefault();
-
-        navItems.forEach((nav) => {
-            nav.classList.remove("active");
-        });
-
-        this.classList.add("active");
     });
 });
 
 
-// Quick action buttons
-const quickActions = document.querySelectorAll(".quick-action");
-
-quickActions.forEach((button) => {
-    button.addEventListener("click", function () {
-
-        const actionName =
-            this.querySelector("strong")?.textContent || "Security Action";
-
-        console.log(`${actionName} selected`);
-
-        alert(`${actionName} module will be connected to the backend soon.`);
-    });
-});
-
-
-// View All button
+// View All scrolls to the stored history on this page.
 const viewButton = document.querySelector(".view-button");
 
 if (viewButton) {
     viewButton.addEventListener("click", function () {
-        alert("Full security activity will be available here.");
+        const activityList = document.getElementById("activityList");
+
+        if (activityList) {
+            activityList.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }
     });
 }
 
 
-// Display current time
-function updateTime() {
-
-    const now = new Date();
-
-    console.log(
-        "Dashboard active:",
-        now.toLocaleTimeString()
-    );
-}
-
-updateTime();
-
-
-// Refresh the time every minute
-setInterval(updateTime, 60000);

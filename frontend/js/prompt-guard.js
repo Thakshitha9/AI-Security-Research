@@ -31,6 +31,21 @@ const patternMatches =
 const aiAnalysis =
     document.getElementById("aiAnalysis");
 
+const promptMessage =
+    document.getElementById("promptMessage");
+
+function showPromptMessage(message, isError) {
+    if (!promptMessage) {
+        return;
+    }
+
+    promptMessage.hidden = !message;
+    promptMessage.textContent = message || "";
+    promptMessage.className = isError
+        ? "form-message error"
+        : "form-message";
+}
+
 
 scanPromptButton.addEventListener(
     "click",
@@ -39,9 +54,11 @@ scanPromptButton.addEventListener(
         const text = promptText.value.trim();
 
         if (!text) {
-            alert("Please enter text to analyze.");
+            showPromptMessage("Enter text to analyze.", true);
             return;
         }
+
+        showPromptMessage("", false);
 
         scanPromptButton.disabled = true;
         scanPromptButton.textContent = "Scanning...";
@@ -57,11 +74,18 @@ scanPromptButton.addEventListener(
                     },
                     body: JSON.stringify({
                         text: text
-                    })
+                    }),
+                    signal: AbortSignal.timeout(130000)
                 }
             );
 
-            const data = await response.json();
+            let data;
+
+            try {
+                data = await response.json();
+            } catch (parseError) {
+                throw new Error("The API returned an unreadable response.");
+            }
 
             if (!response.ok) {
                 throw new Error(
@@ -95,25 +119,36 @@ scanPromptButton.addEventListener(
                 resultTitle.textContent =
                     "High-Risk Prompt Injection";
 
-                resultDescription.textContent =
-                    "Strong indicators of a malicious prompt injection attempt were detected.";
-
             } else if (data.risk_score >= 30) {
 
                 resultTitle.textContent =
                     "Potential Prompt Injection";
 
-                resultDescription.textContent =
-                    "Suspicious instruction patterns were detected.";
-
             } else {
 
                 resultTitle.textContent =
                     "No Major Injection Detected";
-
-                resultDescription.textContent =
-                    "The submitted text contains no significant prompt injection indicators.";
             }
+
+            const evidenceText = Array.isArray(data.evidence) &&
+                data.evidence.length > 0
+                ? data.evidence.join("; ")
+                : "No matched evidence was returned.";
+
+            resultDescription.textContent = [
+                "Risk Level: " + (data.risk_level || "Not returned"),
+                "Finding: " + (data.finding || "Not returned"),
+                "Evidence: " + evidenceText,
+                "Explanation: " + (
+                    data.explanation ||
+                    data.ai_analysis ||
+                    "No explanation was returned."
+                ),
+                "Recommendation: " + (
+                    data.recommendation ||
+                    "No recommendation was returned."
+                )
+            ].join("\n");
 
 
             // Clean pattern matches
@@ -207,10 +242,15 @@ scanPromptButton.addEventListener(
                 error
             );
 
-            alert(
-                "Unable to analyze the text. " +
-                "Please make sure the Prompt Guard API is running."
-            );
+            let message = error.message || "The scan could not be completed.";
+
+            if (error.name === "TimeoutError" || error.name === "AbortError") {
+                message = "The Prompt Guard request timed out.";
+            } else if (error instanceof TypeError) {
+                message = "Unable to reach the Prompt Guard API on port 5001.";
+            }
+
+            showPromptMessage(message, true);
 
         }
         finally {

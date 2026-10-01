@@ -7,13 +7,31 @@ const riskBadge = document.getElementById("riskBadge");
 const riskScore = document.getElementById("riskScore");
 const confidenceScore = document.getElementById("confidenceScore");
 const aiExplanation = document.getElementById("aiExplanation");
+const formMessage = document.getElementById("formMessage");
+const fieldRiskLevel = document.getElementById("fieldRiskLevel");
+const fieldFinding = document.getElementById("fieldFinding");
+const fieldEvidence = document.getElementById("fieldEvidence");
+const fieldExplanation = document.getElementById("fieldExplanation");
+const fieldRecommendation = document.getElementById("fieldRecommendation");
+
+function showFormMessage(message, isError) {
+    if (!formMessage) {
+        return;
+    }
+
+    formMessage.hidden = false;
+    formMessage.textContent = message;
+    formMessage.className = isError
+        ? "form-message error"
+        : "form-message";
+}
 
 analyzeButton.addEventListener("click", async function () {
 
     const url = urlInput.value.trim();
 
     if (!url) {
-        alert("Please enter a website URL.");
+        showFormMessage("Enter a website URL.", true);
         return;
     }
 
@@ -31,14 +49,25 @@ analyzeButton.addEventListener("click", async function () {
                 },
                 body: JSON.stringify({
                     url: url
-                })
+                }),
+                signal: AbortSignal.timeout(130000)
             }
         );
 
-        const data = await response.json();
+        let data;
+
+        try {
+            data = await response.json();
+        } catch (parseError) {
+            throw new Error("The API returned an unreadable response.");
+        }
 
         if (!response.ok) {
             throw new Error(data.error || "Analysis failed");
+        }
+
+        if (formMessage) {
+            formMessage.hidden = true;
         }
 
         // Show result section
@@ -74,27 +103,51 @@ analyzeButton.addEventListener("click", async function () {
 
         }
 
-        // Display detected indicators
-        if (data.indicators && data.indicators.length > 0) {
+        const evidence = Array.isArray(data.evidence) && data.evidence.length
+            ? data.evidence
+            : (Array.isArray(data.indicators) ? data.indicators : []);
 
-            aiExplanation.textContent +=
-                "\n\nDetected Indicators:\n" +
-                data.indicators
-                    .map(indicator => "• " + indicator)
-                    .join("\n");
+        if (fieldRiskLevel) {
+            fieldRiskLevel.textContent = data.risk_level || riskBadge.textContent;
+        }
+
+        if (fieldFinding) {
+            fieldFinding.textContent = data.finding || "No finding was returned.";
+        }
+
+        if (fieldEvidence) {
+            fieldEvidence.textContent = evidence.length
+                ? evidence.join("; ")
+                : "No indicators were returned.";
+        }
+
+        if (fieldExplanation) {
+            fieldExplanation.textContent = data.explanation
+                || data.ai_explanation
+                || "No explanation was returned.";
+        }
+
+        if (fieldRecommendation) {
+            fieldRecommendation.textContent = data.recommendation
+                || "No recommendation was returned.";
         }
 
         // We are not displaying a fake confidence value.
-        confidenceScore.textContent = "AI Analysis";
+        confidenceScore.textContent = "Rule checks + optional AI";
 
     } catch (error) {
 
         console.error("Phishing analysis error:", error);
 
-        alert(
-            "Unable to analyze the URL. " +
-            "Please make sure the Flask API is running."
-        );
+        let message = error.message || "The analysis could not be completed.";
+
+        if (error.name === "TimeoutError" || error.name === "AbortError") {
+            message = "The analysis timed out. The API did not respond in time.";
+        } else if (error instanceof TypeError) {
+            message = "Unable to reach the API on port 5000.";
+        }
+
+        showFormMessage(message, true);
 
     } finally {
 

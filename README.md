@@ -1,694 +1,266 @@
+# AI Security Research Platform
 
-# AI Security Research Lab
+An AI-assisted cybersecurity research platform for defensive analysis. It combines rule-based checks with optional large language model explanations so a researcher can review phishing URLs, prompt-injection attempts, retrieval-augmented generation behavior, network reconnaissance output, and honeypot sessions from one project.
 
-An AI-powered cybersecurity research and analysis platform designed to explore security threats, identify suspicious activity, and support defensive security assessments.
+The web console is a local research interface. It is not an authenticated production security operations center.
 
-The platform combines **Artificial Intelligence, cybersecurity analysis, rule-based detection, network reconnaissance, and security-focused web interfaces** into a unified research environment.
+## Problem statement
 
-It provides tools for phishing URL analysis, prompt injection research, RAG security experimentation, and AI-assisted network reconnaissance.
+Security review work is spread across raw tool output, model responses, and notes. A URL score, an Nmap XML file, or a suspicious prompt is hard to explain in an interview or a lab report when the result is only an unstructured paragraph.
 
-> **Project Status:** Active development  
-> **Purpose:** Cybersecurity research, education, and authorized defensive security testing
+This project keeps the existing analysis modules and presents their real results in a consistent structure: risk level, finding, evidence, explanation, and recommendation. It does not invent scan data when a module has nothing to report.
 
----
+## Objectives
 
-## Overview
+- Give each research module a clear web or command-line entry point.
+- Keep rule-based findings even when the configured model is offline.
+- Validate inputs and return safe error messages.
+- Store analysis history in MySQL when a database is configured.
+- Keep secrets in environment variables and out of Git.
 
-The AI Security Research Lab is a modular cybersecurity platform that combines rule-based security analysis with AI-powered explanations and assessment.
+## Features
 
-The project currently includes browser-based interfaces and Python backend services for analyzing suspicious URLs and network reconnaissance data.
+| Module | What it does | How to open it |
+|---|---|---|
+| Dashboard | Shows stored counts, recent analyses, and which local APIs respond | `frontend/index.html` |
+| Phishing detection | Scores a URL from structural indicators and optionally asks Gemini to explain them | `frontend/phishing.html` |
+| Prompt Guard | Flags suspicious prompt patterns and can add a model assessment | `frontend/prompt-guard.html` |
+| RAG assistant | Answers from the local lab knowledge base | `frontend/rag.html` |
+| Recon AI | Parses authorized Nmap XML and summarizes exposed services | `frontend/recon.html` |
+| Security reports | Drafts a defensive report from recon assessment data | `frontend/report.html` |
+| LLM honeypot | Logs and classifies sessions against decoy personas | `honeypot` CLI |
+| Prompt injection lab | Runs the project's labeled research cases | `injection-lab` CLI |
+| RAG poison lab | Compares clean and poisoned retrieval behavior in the lab dataset | `rag-poison` CLI |
+| Adversarial IDS | Separate research package for model robustness experiments | `adversarial_ids/` |
 
-The platform is designed to help users:
+The honeypot, injection lab, RAG poison lab, and adversarial IDS package stay command-line tools. The dashboard does not pretend they are web services.
 
-- Identify suspicious URL characteristics.
-- Analyze potential phishing indicators.
-- Inspect network reconnaissance results.
-- Review exposed services and associated security risks.
-- Explore prompt injection and RAG security concepts.
-- Generate AI-assisted security explanations and recommendations.
-- Understand security findings through a centralized web interface.
-
-The system is intended for use in authorized, controlled, and educational environments.
-
----
-
-## Key Features
-
-### 1. Phishing Website Detection
-
-Analyzes a submitted URL using rule-based URL feature extraction and security indicators.
-
-The analyzer checks characteristics such as:
-
-- URL length.
-- HTTPS usage.
-- IP address usage.
-- Suspicious keywords.
-- Hyphens and special characters.
-- Potentially suspicious URL patterns.
-- Domain and URL structure.
-
-The system calculates a rule-based risk score and returns detected indicators.
-
-An AI explanation can also be generated through the configured Gemini provider when the AI service is available.
-
-**Current implementation:**
-
-- Flask API backend.
-- Browser-based phishing analysis interface.
-- Rule-based URL analysis.
-- Risk score generation.
-- Suspicious indicator detection.
-- AI-generated explanation with fallback handling.
-- Analysis storage through the project database layer.
-
-**API endpoint:**
-
-```http
-POST /api/phishing/analyze
-```
-
-**Example request:**
-
-```json
-{
-  "url": "https://www.google.com"
-}
-```
-
-**Example response structure:**
-
-```json
-{
-  "url": "https://www.google.com",
-  "risk_score": 0,
-  "indicators": [],
-  "ai_explanation": "..."
-}
-```
-
-> The risk score is an automated assessment based on configured indicators. It does not independently prove that a website is malicious or safe.
-
----
-
-### 2. Recon AI
-
-Recon AI analyzes network reconnaissance data, including Nmap XML scan results.
-
-The tool is designed to assist with defensive security assessment by identifying exposed services, assigning risk classifications, and generating security recommendations.
-
-**Supported functionality:**
-
-- Nmap XML file upload.
-- Network host parsing.
-- Exposed port and service identification.
-- Heuristic security findings.
-- Host-level risk scores.
-- AI-assisted security analysis.
-- Defensive remediation recommendations.
-- Browser-based report presentation.
-
-**Recon API health endpoint:**
-
-```http
-GET /api/recon/health
-```
-
-**Example response:**
-
-```json
-{
-  "status": "online",
-  "service": "Recon AI"
-}
-```
-
-**Example input:**
+## Architecture
 
 ```text
-sample_nmap.xml
+Browser UI (frontend/)
+    |
+    +-- Main API          127.0.0.1:5000   phishing, dashboard, RAG
+    +-- Prompt Guard API  127.0.0.1:5001
+    +-- Recon AI API      127.0.0.1:5002
+    +-- Report API        127.0.0.1:5003
+            |
+            +-- Rule-based analyzers
+            +-- core/llm_client.py   Ollama, Groq, Hugging Face, or Gemini
+            +-- Optional MySQL history
 ```
 
-The Recon AI interface can display information such as:
+Each API binds to loopback. The browser is allowed to call localhost and 127.0.0.1. Analysis results are still returned when MySQL is down; they are simply not stored.
 
-- Hosts analyzed.
-- Total findings.
-- High-risk findings.
-- Hostnames and IP addresses.
-- Exposed ports.
-- Detected services.
-- Risk levels.
-- Defensive recommendations.
-- AI-generated security analysis.
+Phishing analysis does not fetch the submitted URL. It inspects the string. Recon AI accepts an uploaded Nmap XML document. It does not run Nmap.
 
-> Recon results must be reviewed by a security professional or system administrator. Detected services and heuristic findings require validation against the actual environment.
+## Technology stack
 
----
+- Python 3.10+
+- Flask and Flask-CORS for the local APIs
+- HTML, CSS, and JavaScript for the console
+- HTTPX for model requests
+- python-dotenv for configuration
+- MySQL, through `mysql-connector-python`, for optional history
+- ChromaDB for the RAG lab store
+- Rich and Click for the command-line modules
 
-### 3. Prompt Guard
-
-Prompt Guard is intended to support research into detecting suspicious or potentially malicious prompt content.
-
-The research area includes identifying patterns associated with prompt injection, instruction override attempts, and other manipulation techniques.
-
-Potential detection categories include:
-
-- Instruction override.
-- Role manipulation.
-- Information extraction.
-- Delimiter manipulation.
-- Encoding-based attempts.
-- Authority impersonation.
-
-The exact available functionality depends on the implementation and configuration of the Prompt Guard module.
-
----
-
-### 4. RAG Security Research
-
-The project includes research-oriented work related to Retrieval-Augmented Generation security and knowledge-base poisoning.
-
-The purpose of this research is to understand how manipulated documents or instructions may influence retrieval-based AI systems.
-
-Research areas include:
-
-- RAG knowledge-base security.
-- Malicious document injection.
-- Context manipulation.
-- Retrieval integrity.
-- AI response evaluation.
-- Defensive safeguards for retrieved content.
-
-Experiments must be performed only against local, test, or explicitly authorized knowledge bases.
-
----
-
-## System Architecture
+## Project structure
 
 ```text
-                    AI SECURITY RESEARCH LAB
-                              |
-                +-------------+-------------+
-                |                           |
-          Web Frontend                Python Backend
-        HTML / CSS / JavaScript            |
-                |                           |
-                +-------------+-------------+
-                              |
-                         Flask APIs
-                              |
-       +----------------------+----------------------+
-       |                      |                      |
- Phishing Analysis       Recon AI              Other Modules
-       |                      |                      |
- URL Feature           Nmap XML Parser       Prompt Guard
- Extraction             and Analyzer         RAG Research
-       |                      |
- Rule-Based             Risk Findings
- Detection              and AI Analysis
-       |                      |
-       +-------------+------+
-                     |
-               LLM Provider
-                     |
-               Gemini API
-                     |
-             AI Explanation
-                     |
-              Database Layer
+api.py                      Main API: phishing, dashboard, RAG
+prompt_guard_api.py         Prompt Guard API
+recon_ai_api.py             Recon AI API
+security_report_api.py      Report API
+core/                       Model client, validation, history
+database/schema.sql         MySQL tables
+frontend/                   Dashboard and module pages
+phishing_detector/          URL rules and samples
+prompt_guard/               Pattern detector and corpus
+prompt_injection_lab/       Labeled injection research cases
+rag_poison_lab/             Retrieval lab and datasets
+recon_ai/                   Nmap parser and service review
+llm_honeypot/               Decoy personas and session logs
+adversarial_ids/            Separate IDS robustness package
+reports/                    Generated report output, gitignored
+tests/test_safety.py        Validation and API safety checks
 ```
 
----
+## Installation
 
-## Project Structure
-
-```text
-AI-Security-Research/
-│
-├── api.py
-├── recon_ai_api.py
-├── pyproject.toml
-├── README.md
-├── .env.example
-│
-├── core/
-│   ├── config.py
-│   ├── llm_client.py
-│   └── utils.py
-│
-├── phishing_detector/
-│   └── url_analyzer.py
-│
-├── frontend/
-│   ├── index.html
-│   ├── phishing.html
-│   ├── recon.html
-│   ├── prompt-guard.html
-│   ├── rag.html
-│   │
-│   └── js/
-│       ├── phishing.js
-│       └── recon.js
-│
-├── sample_nmap.xml
-│
-└── .venv/
-```
-
-> The project structure may contain additional files and directories depending on the current development branch. The structure above highlights the components used in the implemented web-based workflow.
-
----
-
-## Technology Stack
-
-| Technology | Purpose |
-|---|---|
-| Python | Core application and security analysis |
-| Flask | Backend API services |
-| HTML | Web page structure |
-| CSS | User interface styling |
-| JavaScript | Frontend interaction and API communication |
-| Gemini API | AI-assisted security explanations |
-| HTTPX | HTTP requests to AI providers |
-| Python-dotenv | Environment variable management |
-| Nmap XML | Network reconnaissance input |
-| Database layer | Storage of security analysis results |
-
----
-
-## Installation and Setup
-
-### 1. Clone the Repository
-
-```bash
+```powershell
 git clone https://github.com/Raresney/AI-Security-Research.git
-```
-
-Move into the project directory:
-
-```bash
 cd AI-Security-Research
-```
-
----
-
-### 2. Create a Virtual Environment
-
-On Windows:
-
-```powershell
 python -m venv .venv
-```
-
-Activate the virtual environment:
-
-```powershell
 .\.venv\Scripts\Activate.ps1
-```
-
-If PowerShell blocks script execution, use an appropriate environment policy permitted by your system administrator.
-
----
-
-### 3. Install Dependencies
-
-```powershell
-pip install -e .
-```
-
-If the project provides a requirements file, install it using:
-
-```powershell
 pip install -r requirements.txt
 ```
 
-Use the dependency file that exists in your local project.
+`pip install -e .` installs the same dependencies and the command-line entry points.
 
----
+## Environment variables
 
-### 4. Configure Environment Variables
-
-Create a `.env` file in the project root.
-
-Example:
-
-```env
-GEMINI_API_KEY=your_api_key_here
-GEMINI_MODEL=gemini-3.5-flash
-```
-
-Do not commit the `.env` file or expose API keys in screenshots, logs, GitHub repositories, or public documentation.
-
-The model name should match a model currently available to your configured API account. If the configured model becomes unavailable, update the model according to the provider's current documentation.
-
----
-
-## Running the Application
-
-### Start the Main Flask API
-
-From the project root, activate the virtual environment and run:
+Copy the template and add keys only for providers you use:
 
 ```powershell
-python -c "from api import app; app.run(host='127.0.0.1', port=5000, debug=False)"
+copy .env.example .env
 ```
 
-The main backend will be available at:
-
-```text
-http://127.0.0.1:5000
-```
-
-The phishing analysis endpoint is:
-
-```text
-http://127.0.0.1:5000/api/phishing/analyze
-```
-
-The endpoint accepts `POST` requests with a JSON body.
-
----
-
-### Start the Recon AI API
-
-Run the Recon AI service:
-
-```powershell
-python recon_ai_api.py
-```
-
-The Recon AI service runs on:
-
-```text
-http://127.0.0.1:5002
-```
-
-Check the service status:
-
-```powershell
-Invoke-RestMethod -Uri "http://127.0.0.1:5002/api/recon/health" -Method GET
-```
-
-Expected response:
-
-```json
-{
-  "status": "online",
-  "service": "Recon AI"
-}
-```
-
----
-
-## Using the Web Interface
-
-### Open the Phishing Detection Interface
-
-```powershell
-Start-Process ".\frontend\phishing.html"
-```
-
-Enter a URL and submit it for analysis.
-
-The interface displays:
-
-- Submitted URL.
-- Risk score.
-- Detected indicators.
-- AI explanation when available.
-- Fallback information when the AI provider is unavailable.
-
----
-
-### Open the Recon AI Interface
-
-```powershell
-Start-Process ".\frontend\recon.html"
-```
-
-Upload an Nmap XML file generated from an authorized assessment.
-
-Example input:
-
-```text
-sample_nmap.xml
-```
-
-The Recon AI interface presents the parsed results and the associated security analysis.
-
----
-
-## API Examples
-
-### Phishing URL Analysis
-
-PowerShell:
-
-```powershell
-$body = @{
-    url = "https://www.google.com"
-} | ConvertTo-Json
-
-Invoke-RestMethod `
-    -Uri "http://127.0.0.1:5000/api/phishing/analyze" `
-    -Method POST `
-    -ContentType "application/json" `
-    -Body $body
-```
-
-The request must contain a `url` field.
-
-The API validates that the URL field exists and is not empty before running the analysis.
-
----
-
-### Recon AI Health Check
-
-```powershell
-Invoke-RestMethod `
-    -Uri "http://127.0.0.1:5002/api/recon/health" `
-    -Method GET
-```
-
----
-
-## Phishing Detection Workflow
-
-```text
-User submits a URL
-        |
-        v
-Frontend sends POST request
-        |
-        v
-Flask API validates the request
-        |
-        v
-URL feature extraction
-        |
-        v
-Rule-based indicator analysis
-        |
-        v
-Risk score calculation
-        |
-        v
-AI explanation generation
-        |
-        +---- AI available
-        |          |
-        |          v
-        |    AI explanation
-        |
-        +---- AI unavailable
-                   |
-                   v
-          Fallback explanation
-        |
-        v
-Store analysis result
-        |
-        v
-Return JSON response
-```
-
----
-
-## Recon AI Workflow
-
-```text
-User uploads Nmap XML file
-        |
-        v
-Frontend sends scan data
-        |
-        v
-Recon API validates and parses input
-        |
-        v
-Hosts and services are extracted
-        |
-        v
-Heuristic findings are generated
-        |
-        v
-Risk levels and host scores are calculated
-        |
-        v
-AI-assisted security analysis
-        |
-        v
-Defensive recommendations
-        |
-        v
-Results displayed in the frontend
-```
-
----
-
-## AI Provider Configuration
-
-The project includes a shared LLM client and provider configuration.
-
-The provider configuration supports multiple provider options in the codebase. The web phishing workflow currently uses the configured Gemini provider.
-
-| Provider | Usage |
+| Variable | Purpose |
 |---|---|
-| Gemini | AI-assisted phishing explanations and security analysis |
-| Ollama | Provider option available in the shared LLM configuration |
-| Groq | Provider option available in the shared LLM configuration |
-| Hugging Face | Provider option available in the shared LLM configuration |
+| `OLLAMA_BASE_URL`, `OLLAMA_MODEL` | Local model. Tried first by the automatic client |
+| `GROQ_API_KEY`, `GROQ_MODEL` | Groq API |
+| `HF_API_TOKEN`, `HF_MODEL` | Hugging Face API |
+| `GEMINI_API_KEY`, `GEMINI_MODEL` | Gemini. Used by the phishing, recon, and report web APIs |
+| `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE` | Optional history database |
+| `CORS_EXTRA_ORIGINS` | Extra browser origins, comma-separated |
 
-Provider availability depends on the implementation, environment variables, model availability, and API limits.
+Leave unused keys blank. Placeholder values that start with `your_` are ignored by the automatic provider check.
 
-### AI Fallback Behavior
+## Database setup
 
-When the AI provider is unavailable or returns an error, the phishing workflow is designed to retain the rule-based URL analysis and provide a fallback explanation.
+MySQL is optional. To store history:
 
-This ensures that a temporary AI provider failure does not necessarily prevent the URL analysis from being completed.
-
----
-
-## Security Considerations
-
-### API Key Protection
-
-- Keep API keys in `.env`.
-- Do not commit secrets to GitHub.
-- Do not share API keys in screenshots or terminal output.
-- Rotate a key immediately if it is accidentally exposed.
-- Use separate development and production credentials.
-
-### Authorized Testing
-
-Only analyze:
-
-- Systems you own.
-- Systems for which you have written authorization.
-- Local test environments.
-- Purpose-built cybersecurity training targets.
-
-Do not scan or test external systems without permission.
-
-### AI Output Limitations
-
-AI-generated explanations may be incomplete, inaccurate, or affected by provider availability.
-
-AI output should be reviewed alongside:
-
-- Actual scan results.
-- Rule-based findings.
-- Application logs.
-- Security configuration.
-- Relevant system documentation.
-
-The platform does not guarantee that a URL, host, or service is completely safe or malicious.
-
----
-
-## Testing and Validation
-
-The following components have been tested during development:
-
-- Main Flask application startup.
-- Phishing analysis API request structure.
-- Rule-based URL analysis.
-- Phishing risk indicator generation.
-- Recon AI API health endpoint.
-- Nmap XML-based Recon workflow.
-- AI provider connectivity through the shared LLM client.
-
-Additional validation should be performed before treating the platform as production-ready.
-
-Recommended future tests include:
-
-- Unit tests for URL feature extraction.
-- API validation tests.
-- Error-handling tests.
-- Database storage verification.
-- AI provider failure tests.
-- Malformed Nmap XML tests.
-- Frontend and backend integration tests.
-- Security testing of input handling.
-
----
-
-## Current Limitations
-
-- AI provider availability depends on external API services and model availability.
-- AI explanations may fail temporarily due to API errors, rate limits, or service availability.
-- Rule-based phishing analysis should not be treated as a complete phishing detection solution.
-- Recon findings are heuristic and require validation.
-- The project is intended for research and educational use rather than unrestricted production deployment.
-- Some research modules may require additional configuration or implementation validation.
-
----
-
-## Future Enhancements
-
-Potential improvements include:
-
-- Improved URL feature extraction.
-- Additional phishing detection models.
-- Automated unit and integration testing.
-- More detailed database analytics.
-- Authentication and role-based access control.
-- Improved API error handling.
-- Security report export to PDF and JSON.
-- Recon report history and comparison.
-- Enhanced prompt injection benchmarking.
-- RAG security evaluation dashboards.
-- Centralized application logging.
-- Docker-based deployment.
-- CI/CD security checks.
-- Improved model fallback and retry handling.
-
-Future enhancements will be implemented and documented as they become available.
-
----
-
-## Project Attribution
-
-Original repository:
-
-[AI Security Research](https://github.com/Raresney/AI-Security-Research)
-
-Copyright:
-
-```text
-Copyright (c) 2026 Bighiu Rares
+```sql
+CREATE DATABASE ai_security_platform CHARACTER SET utf8mb4;
+CREATE USER 'ai_security_user'@'127.0.0.1' IDENTIFIED BY 'choose-a-password';
+GRANT ALL PRIVILEGES ON ai_security_platform.* TO 'ai_security_user'@'127.0.0.1';
 ```
 
-Repository ownership and attribution should be preserved according to the original project's license and contribution requirements.
+Put that password in `.env` as `MYSQL_PASSWORD`. Then load the tables:
 
----
+```powershell
+mysql -u ai_security_user -p ai_security_platform < database/schema.sql
+```
 
-## Disclaimer
+The APIs also run `CREATE TABLE IF NOT EXISTS` when they can connect. Existing `phishing_analysis` rows remain readable. New phishing results are stored in both `phishing_analysis` and `security_analyses`. Other modules write only to `security_analyses`.
 
-This project is intended for **cybersecurity research, education, and authorized defensive testing only**.
+`security_analyses` stores the analysis id, module, target, timestamp, risk level, score, finding, evidence, explanation, and recommendation. Uploaded Nmap XML is not stored. Prompt Guard stores only a short target preview.
 
-Do not use the tools to access, scan, manipulate, or exploit systems without explicit permission.
+## How to run
 
-The authors and contributors are not responsible for unauthorized use, damage, data loss, or security incidents resulting from the misuse of this project.
+Start only the APIs you need, from the project root, with the virtual environment active. Keep `debug` off.
 
-Always perform experiments in controlled environments and follow applicable laws, organizational policies, and responsible disclosure practices.
+```powershell
+python api.py
+python prompt_guard_api.py
+python recon_ai_api.py
+python security_report_api.py
+```
+
+Open `frontend/index.html` in a browser. Pages opened from disk or from localhost can call the loopback APIs.
+
+Health checks:
+
+```text
+GET http://127.0.0.1:5000/api/health
+GET http://127.0.0.1:5001/api/prompt-guard/health
+GET http://127.0.0.1:5002/api/recon/health
+GET http://127.0.0.1:5003/api/security-report/health
+```
+
+## How each module works
+
+### Phishing detection
+
+`POST /api/phishing/analyze` with `{"url": "https://example.com"}`.
+
+The rules look at scheme, length, IP literals, `@`, repeated hyphens, and a fixed keyword list. The score is capped at 100. A score of 70 or more is HIGH, 40 to 69 is MEDIUM, 1 to 39 is LOW, and 0 is INFO. Gemini may explain that evidence. If the model fails or times out, the rule result is still returned. The response includes the original fields plus `risk_level`, `finding`, `evidence`, `explanation`, and `recommendation`.
+
+### Prompt Guard
+
+`POST /api/prompt-guard/scan` with `{"text": "..."}` on port 5001.
+
+Pattern matches supply the evidence. The model assessment is optional. Text is limited to 8,000 characters.
+
+### RAG assistant
+
+`POST /api/rag/ask` with `{"question": "..."}` on port 5000.
+
+The API loads the lab knowledge base into a temporary vector store and answers from retrieved passages. Questions are limited to 2,000 characters.
+
+### Recon AI
+
+`POST /api/recon/analyze` with `{"xml": "<nmaprun>...</nmaprun>"}` on port 5002.
+
+The parser accepts Nmap XML only, rejects document-type and entity declarations, and limits the upload size. Service findings come from the ports present in the file. If Gemini fails, the rule-based findings are still returned. An empty host list is an empty result, not a fabricated network.
+
+Use this only on scans you are authorized to assess. The included `sample_nmap.xml` is a local sample.
+
+### Security reports
+
+`POST /api/security-report/generate` on port 5003 with the recon assessment JSON. The writer is instructed to use only supplied hosts, services, and observations. Reports are written under `reports/security/`.
+
+### Command-line research modules
+
+```powershell
+phish-detect --help
+prompt-guard --help
+recon-ai --help
+injection-lab --help
+rag-poison --help
+honeypot --help
+```
+
+Run these in a lab. Do not point them at systems, inboxes, or networks you do not have permission to test.
+
+## Example workflow
+
+1. Start `python api.py`.
+2. Open the dashboard. Counts show an em dash until a result is stored. If MySQL is offline, the page says history is unavailable instead of showing a zero that looks like a completed scan.
+3. Open Phishing Detection and submit `https://example.com`.
+4. Read the structured assessment. A normal HTTPS URL with no keyword hits should come back as INFO or LOW, with the indicators that were actually found.
+5. Submit an `http://` URL that uses an IP address. The evidence list should name the checks that fired.
+6. Return to the dashboard. After MySQL is connected, the new row appears under recent activity and the counts change to match the database.
+7. Start the Recon API and upload `sample_nmap.xml` only if you want to demo the parser. Review the returned hosts. Do not treat heuristic port notes as proof of compromise.
+
+## Screenshots
+
+Add current captures here after you run the console. Do not include API keys, passwords, or real customer data.
+
+- `docs/screenshots/dashboard.png` — dashboard with real history, or the empty state
+- `docs/screenshots/phishing-result.png` — structured URL assessment
+- `docs/screenshots/prompt-guard.png` — prompt scan
+- `docs/screenshots/recon-findings.png` — findings from an authorized or sample scan
+- `docs/screenshots/honeypot_report.png` — existing honeypot report image
+- `docs/screenshots/rag_poison_results.png` — existing RAG lab image
+
+## Security considerations
+
+- The APIs listen on 127.0.0.1 and have no login. Do not expose them to a network.
+- Browser access is limited to localhost, 127.0.0.1, and `null` origins used by local files. Add other origins only through `CORS_EXTRA_ORIGINS`.
+- Error responses do not include stack traces, exception text, or configuration.
+- `.env` is gitignored. `.env.example` contains empty keys.
+- Database statements use parameters.
+- Nmap XML entity declarations are rejected before parsing.
+- The phishing module does not download the submitted URL.
+- Model prompts for recon ask for defensive review and tell the model not to provide exploit steps.
+- This repository is for research, education, and authorized defensive testing.
+
+## Limitations
+
+- Four API processes are started separately. A stopped process shows as Offline on the dashboard.
+- There is no user authentication or multi-user tenancy.
+- Phishing scores are heuristics. They do not prove that a site is malicious or safe.
+- Recon notes are based on port and service observations. They are not a vulnerability scan.
+- Model text can be wrong. The structured fields show what the rules returned and label the explanation as model output.
+- History requires MySQL. Without it, results are shown once and not saved.
+- The command-line labs are research tools. They are not hardened production services.
+
+## Future enhancements
+
+- One process for all web APIs.
+- Authentication in front of any non-local deployment.
+- Stronger phishing features that still avoid fetching arbitrary URLs by default.
+- Saved report comparison.
+- Automated tests around the command-line labs.
+
+## Author
+
+Bighiu Rares
+
+Repository: [https://github.com/Raresney/AI-Security-Research](https://github.com/Raresney/AI-Security-Research)
+
+Copyright (c) 2026 Bighiu Rares
+
+Use this project only with permission, in a controlled lab, and within the law and your organization's rules.

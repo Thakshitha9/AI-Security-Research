@@ -45,46 +45,46 @@
             </a>
 
 
-            <a href="#" class="nav-item">
+            <a href="rag.html" class="nav-item">
                 <span>◈</span>
                 <span>RAG Assistant</span>
             </a>
 
 
-            <a href="#" class="nav-item">
+            <a href="prompt-guard.html" class="nav-item">
                 <span>🛡</span>
                 <span>Prompt Guard</span>
             </a>
 
 
-            <a href="#" class="nav-item">
+            <a href="recon.html" class="nav-item">
                 <span>⌁</span>
                 <span>Recon AI</span>
             </a>
 
 
-            <a href="#" class="nav-item">
+            <a href="report.html" class="nav-item">
                 <span>▤</span>
                 <span>Security Reports</span>
             </a>
 
 
-            <a href="#" class="nav-item">
+            <span class="nav-item disabled" title="Use the honeypot command-line module">
                 <span>♟</span>
                 <span>Honeypot</span>
-            </a>
+            </span>
 
 
-            <a href="#" class="nav-item">
+            <a href="index.html#activityList" class="nav-item">
                 <span>◷</span>
                 <span>Activity Logs</span>
             </a>
 
 
-            <a href="#" class="nav-item">
+            <span class="nav-item disabled" title="Configuration is read from the local .env file">
                 <span>⚙</span>
                 <span>Settings</span>
-            </a>
+            </span>
 
         </nav>
 
@@ -94,8 +94,8 @@
             <div class="status-dot"></div>
 
             <div>
-                <strong>System Online</strong>
-                <span>All services operational</span>
+                <strong>Research console</strong>
+                <span>Local analysis workspace</span>
             </div>
 
         </div>
@@ -132,7 +132,7 @@
 
                     <span class="status-dot"></span>
 
-                    AI Engine Online
+                    Local API
 
                 </div>
 
@@ -231,9 +231,11 @@
 
 
                     <span class="input-help">
-                        The AI engine will analyze URL characteristics
-                        and security indicators.
+                        The analyzer checks URL structure only. It does
+                        not open the website.
                     </span>
+
+                    <p id="formMessage" class="form-message" hidden></p>
 
                 </div>
 
@@ -322,6 +324,28 @@
                     <!-- =========================
                          AI EXPLANATION
                     ========================== -->
+                    <div class="explanation">
+
+                        <h3>
+                            Structured assessment
+                        </h3>
+
+                        <dl class="assessment-list">
+                            <dt>Risk Level</dt>
+                            <dd id="fieldRiskLevel">—</dd>
+                            <dt>Finding</dt>
+                            <dd id="fieldFinding">—</dd>
+                            <dt>Evidence</dt>
+                            <dd id="fieldEvidence">—</dd>
+                            <dt>Explanation</dt>
+                            <dd id="fieldExplanation">—</dd>
+                            <dt>Recommendation</dt>
+                            <dd id="fieldRecommendation">—</dd>
+                        </dl>
+
+                    </div>
+
+
                     <div class="explanation">
 
                         <h3>

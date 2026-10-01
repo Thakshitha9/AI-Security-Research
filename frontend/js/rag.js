@@ -4,6 +4,19 @@ const ragQuestion = document.getElementById("ragQuestion");
 const ragResult = document.getElementById("ragResult");
 const ragAnswer = document.getElementById("ragAnswer");
 const ragSources = document.getElementById("ragSources");
+const ragMessage = document.getElementById("ragMessage");
+
+function showRagMessage(message, isError) {
+    if (!ragMessage) {
+        return;
+    }
+
+    ragMessage.hidden = !message;
+    ragMessage.textContent = message || "";
+    ragMessage.className = isError
+        ? "form-message error"
+        : "form-message";
+}
 
 
 askRagButton.addEventListener("click", async function () {
@@ -11,9 +24,11 @@ askRagButton.addEventListener("click", async function () {
     const question = ragQuestion.value.trim();
 
     if (!question) {
-        alert("Please enter a security question.");
+        showRagMessage("Enter a security question.", true);
         return;
     }
+
+    showRagMessage("", false);
 
 
     // ------------------------------------------
@@ -37,12 +52,19 @@ askRagButton.addEventListener("click", async function () {
 
                 body: JSON.stringify({
                     question: question
-                })
+                }),
+                signal: AbortSignal.timeout(130000)
             }
         );
 
 
-        const data = await response.json();
+        let data;
+
+        try {
+            data = await response.json();
+        } catch (parseError) {
+            throw new Error("The API returned an unreadable response.");
+        }
 
 
         if (!response.ok) {
@@ -146,10 +168,15 @@ askRagButton.addEventListener("click", async function () {
         );
 
 
-        alert(
-            "Unable to get the AI response. " +
-            "Please make sure the Flask API is running."
-        );
+        let message = error.message || "The RAG request could not be completed.";
+
+        if (error.name === "TimeoutError" || error.name === "AbortError") {
+            message = "The RAG request timed out.";
+        } else if (error instanceof TypeError) {
+            message = "Unable to reach the API on port 5000.";
+        }
+
+        showRagMessage(message, true);
 
 
     } finally {

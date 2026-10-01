@@ -53,19 +53,19 @@
             </a>
 
 
-            <a href="#" class="nav-item">
+            <a href="rag.html" class="nav-item">
                 <span>◈</span>
                 RAG Assistant
             </a>
 
 
-            <a href="#" class="nav-item">
+            <a href="prompt-guard.html" class="nav-item">
                 <span>⚠</span>
                 Prompt Guard
             </a>
 
 
-            <a href="#" class="nav-item">
+            <a href="recon.html" class="nav-item">
                 <span>⌁</span>
                 Recon AI
             </a>
@@ -76,19 +76,19 @@
             </p>
 
 
-            <a href="#" class="nav-item">
+            <a href="report.html" class="nav-item">
                 <span>◫</span>
                 Security Reports
             </a>
 
 
-            <a href="#" class="nav-item">
+            <span class="nav-item disabled" title="Use the honeypot command-line module">
                 <span>◉</span>
                 Honeypot
-            </a>
+            </span>
 
 
-            <a href="#" class="nav-item">
+            <a href="#activityList" class="nav-item">
                 <span>◌</span>
                 Activity Logs
             </a>
@@ -99,10 +99,10 @@
             </p>
 
 
-            <a href="#" class="nav-item">
+            <span class="nav-item disabled" title="Configuration is read from the local .env file">
                 <span>⚙</span>
                 Settings
-            </a>
+            </span>
 
         </nav>
 
@@ -116,11 +116,11 @@
                 <div>
 
                     <strong>
-                        System Secure
+                        Research console
                     </strong>
 
-                    <small>
-                        All services operational
+                    <small id="sidebarStatus">
+                        Checking local APIs
                     </small>
 
                 </div>
@@ -161,9 +161,9 @@
 
                 <div class="api-status">
 
-                    <span class="status-dot"></span>
+                    <span class="status-dot" id="engineDot"></span>
 
-                    AI Engine Online
+                    <span id="engineStatus">API status unknown</span>
 
                 </div>
 
@@ -257,7 +257,7 @@
 
 
                         <h3 id="phishingDetected">
-                            0
+                            —
                         </h3>
 
 
@@ -288,7 +288,7 @@
 
 
                         <h3 id="securityScans">
-                            0
+                            —
                         </h3>
 
 
@@ -319,12 +319,41 @@
 
 
                         <h3 id="mediumRisk">
-                            0
+                            —
                         </h3>
 
 
                         <small class="success-text">
                             Risk Score 40–69
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon risk-icon">
+                        ◌
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Low Risk
+                        </span>
+
+
+                        <h3 id="lowRisk">
+                            —
+                        </h3>
+
+
+                        <small class="success-text">
+                            Risk Score below 40
                         </small>
 
                     </div>
@@ -352,7 +381,7 @@
                         <h3>
 
                             <span id="averageRiskScore">
-                                0
+                                —
                             </span>
 
                             <span class="score-unit">
@@ -372,6 +401,38 @@
 
             </div>
 
+
+            <p id="dashboardNotice" class="dashboard-notice" hidden></p>
+
+
+            <div class="panel" id="latestFindingPanel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h3>
+                            Latest finding
+                        </h3>
+
+                        <p>
+                            Structured fields from the newest stored analysis
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div id="latestFinding" class="structured-finding">
+
+                    <p class="empty-copy">
+                        No stored findings yet. Run an analysis to see the
+                        risk level, evidence, and recommendation here.
+                    </p>
+
+                </div>
+
+            </div>
 
 
             <!-- =========================
@@ -490,8 +551,8 @@
                             </div>
 
 
-                            <span class="module-status online">
-                                Online
+                            <span class="module-status" id="statusPhishing">
+                                Checking
                             </span>
 
                         </div>
@@ -520,8 +581,8 @@
                             </div>
 
 
-                            <span class="module-status online">
-                                Online
+                            <span class="module-status" id="statusRag">
+                                Checking
                             </span>
 
                         </div>
@@ -550,8 +611,8 @@
                             </div>
 
 
-                            <span class="module-status online">
-                                Online
+                            <span class="module-status" id="statusPrompt">
+                                Checking
                             </span>
 
                         </div>
@@ -580,11 +641,36 @@
                             </div>
 
 
-                            <span class="module-status online">
-                                Online
+                            <span class="module-status" id="statusRecon">
+                                Checking
                             </span>
 
                         </div>
+
+
+                        <a class="module-item" href="report.html">
+
+                            <div class="module-icon">
+                                ◫
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    Security Reports
+                                </strong>
+
+                                <span>
+                                    Defensive report drafts
+                                </span>
+
+                            </div>
+
+                            <span class="module-status" id="statusReports">
+                                Checking
+                            </span>
+
+                        </a>
 
                     </div>
 
@@ -622,11 +708,7 @@
                 <div class="quick-actions">
 
 
-                    <button
-                        class="quick-action"
-                        type="button"
-                        onclick="window.location.href='phishing.html'"
-                    >
+                    <a class="quick-action" href="phishing.html">
 
                         <span>
                             ◉
@@ -639,19 +721,16 @@
                             </strong>
 
                             <small>
-                                Analyze an email or URL
+                                Analyze a URL
                             </small>
 
                         </div>
 
-                    </button>
+                    </a>
 
 
 
-                    <button
-                        class="quick-action"
-                        type="button"
-                    >
+                    <a class="quick-action" href="recon.html">
 
                         <span>
                             ⌁
@@ -669,14 +748,11 @@
 
                         </div>
 
-                    </button>
+                    </a>
 
 
 
-                    <button
-                        class="quick-action"
-                        type="button"
-                    >
+                    <a class="quick-action" href="prompt-guard.html">
 
                         <span>
                             ⚠
@@ -694,14 +770,11 @@
 
                         </div>
 
-                    </button>
+                    </a>
 
 
 
-                    <button
-                        class="quick-action"
-                        type="button"
-                    >
+                    <a class="quick-action" href="rag.html">
 
                         <span>
                             ◈
@@ -719,7 +792,7 @@
 
                         </div>
 
-                    </button>
+                    </a>
 
                 </div>
 
@@ -735,222 +808,8 @@
 
     <script src="js/app.js"></script>
 
-    <script>
+    <script src="js/dashboard.js"></script>
 
-        async function loadDashboardStats() {
-
-            try {
-
-                const response = await fetch(
-                    "http://127.0.0.1:5000/api/dashboard/stats"
-                );
-
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        "Unable to load dashboard statistics"
-                    );
-
-                }
-
-
-                const data = await response.json();
-
-
-                // ---------------------------------
-                // Calculate average risk score
-                // ---------------------------------
-
-                let averageRiskScore = 0;
-
-
-                if (data.recent_analyses &&
-                    data.recent_analyses.length > 0) {
-
-                    const totalRisk =
-                        data.recent_analyses.reduce(
-                            (sum, item) =>
-                                sum + item.risk_score,
-                            0
-                        );
-
-                    averageRiskScore =
-                        Math.round(
-                            totalRisk /
-                            data.recent_analyses.length
-                        );
-                }
-
-
-                // ---------------------------------
-                // Update statistics
-                // ---------------------------------
-
-                document.getElementById(
-                    "phishingDetected"
-                ).textContent = data.high_risk;
-
-
-                document.getElementById(
-                    "securityScans"
-                ).textContent = data.total;
-
-
-                document.getElementById(
-                    "mediumRisk"
-                ).textContent = data.medium_risk;
-
-
-                document.getElementById(
-                    "averageRiskScore"
-                ).textContent = averageRiskScore;
-
-
-                // ---------------------------------
-                // Recent activity
-                // ---------------------------------
-
-                const activityList =
-                    document.getElementById(
-                        "activityList"
-                    );
-
-
-                activityList.innerHTML = "";
-
-
-                if (!data.recent_analyses ||
-                    data.recent_analyses.length === 0) {
-
-                    activityList.innerHTML = `
-                        <div class="activity-item">
-
-                            <div class="activity-info">
-
-                                <strong>
-                                    No security activity yet
-                                </strong>
-
-                                <span>
-                                    Analyze a URL to create an activity record.
-                                </span>
-
-                            </div>
-
-                        </div>
-                    `;
-
-                    return;
-                }
-
-
-                data.recent_analyses.forEach(
-                    function (item) {
-
-                        let riskClass = "low";
-                        let riskLabel = "LOW";
-
-                        if (item.risk_score >= 70) {
-
-                            riskClass = "high";
-                            riskLabel = "HIGH";
-
-                        } else if (item.risk_score >= 40) {
-
-                            riskClass = "medium";
-                            riskLabel = "MEDIUM";
-                        }
-
-
-                        const activityItem =
-                            document.createElement("div");
-
-
-                        activityItem.className =
-                            "activity-item";
-
-
-                        activityItem.innerHTML = `
-
-                            <div class="activity-icon ${riskClass}">
-                                ${item.risk_score >= 70 ? "◉" : "⚠"}
-                            </div>
-
-
-                            <div class="activity-info">
-
-                                <strong>
-                                    URL Security Analysis
-                                </strong>
-
-                                <span>
-                                    ${item.url}
-                                </span>
-
-                            </div>
-
-
-                            <span class="badge ${riskClass}">
-                                ${riskLabel}
-                            </span>
-
-
-                            <time>
-                                ${new Date(item.created_at).toLocaleString()}
-                            </time>
-
-                        `;
-
-
-                        activityList.appendChild(
-                            activityItem
-                        );
-
-                    }
-                );
-
-
-            } catch (error) {
-
-                console.error(
-                    "Dashboard error:",
-                    error
-                );
-
-
-                document.getElementById(
-                    "activityList"
-                ).innerHTML = `
-
-                    <div class="activity-item">
-
-                        <div class="activity-info">
-
-                            <strong>
-                                Dashboard API unavailable
-                            </strong>
-
-                            <span>
-                                Make sure Flask is running on port 5000.
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                `;
-
-            }
-
-        }
-
-
-        // Load dashboard when page opens
-
-        loadDashboardStats();
-
-    </script>
 
 
 </body>

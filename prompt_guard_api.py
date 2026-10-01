@@ -1,14 +1,21 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
 
 from core.llm_client import LLMClient
 from core.config import LLMProvider
+from core.history import save_module_analysis
+from core.platform import (
+    MAX_PROMPT_LENGTH,
+    install_api_guards,
+    recommendation_for_level,
+    risk_level_from_score,
+    validate_bounded_text,
+)
 
 from prompt_guard.detector import PromptGuard
 
 
 app = Flask(__name__)
-CORS(app)
+install_api_guards(app, max_bytes=100_000)
 
 
 # ==========================================
@@ -18,19 +25,26 @@ CORS(app)
 @app.route("/api/prompt-guard/scan", methods=["POST"])
 def scan_prompt():
 
-    data = request.get_json()
+    data = request.get_json(silent=True)
 
-    if not data or "text" not in data:
+    if not isinstance(data, dict) or "text" not in data:
         return jsonify({
             "error": "Text is required"
         }), 400
 
-    text = data["text"].strip()
+    text = data["text"] if isinstance(data.get("text"), str) else ""
+    text_error = validate_bounded_text(
+        text,
+        "Text",
+        MAX_PROMPT_LENGTH,
+    )
 
-    if not text:
+    if text_error:
         return jsonify({
-            "error": "Text cannot be empty"
+            "error": text_error
         }), 400
+
+    text = text.strip()
 
     try:
 
@@ -46,11 +60,11 @@ def scan_prompt():
                 LLMProvider.HUGGINGFACE
             )
 
-        except Exception as e:
+        except Exception:
 
             print(
-                "LLM CLIENT ERROR:",
-                str(e)
+                "Prompt Guard AI client unavailable.",
+                flush=True,
             )
 
         # --------------------------------------
@@ -111,6 +125,42 @@ def scan_prompt():
 
             })
 
+        risk_level = risk_level_from_score(
+            result.risk_score,
+            medium_at=30,
+        )
+        evidence = [
+            pattern["matched_text"]
+            for pattern in patterns
+            if pattern.get("matched_text")
+        ]
+
+        if result.is_suspicious and evidence:
+            finding = "Potential prompt injection"
+        elif result.is_suspicious:
+            finding = "Suspicious prompt content"
+        else:
+            finding = (
+                "No significant prompt injection indicators "
+                "were detected."
+            )
+
+        recommendation = (
+            result.recommendation
+            or recommendation_for_level(risk_level)
+        )
+
+        save_module_analysis(
+            module="Prompt Guard",
+            target=text[:120],
+            risk_level=risk_level,
+            risk_score=result.risk_score,
+            finding=finding,
+            evidence="; ".join(evidence[:8]),
+            explanation=ai_analysis,
+            recommendation=recommendation,
+        )
+
         # --------------------------------------
         # Return Result
         # --------------------------------------
@@ -122,11 +172,23 @@ def scan_prompt():
             "risk_score":
                 result.risk_score,
 
+            "risk_level":
+                risk_level,
+
             "suspicious":
                 result.is_suspicious,
 
+            "finding":
+                finding,
+
+            "evidence":
+                evidence,
+
+            "explanation":
+                ai_analysis,
+
             "recommendation":
-                result.recommendation,
+                recommendation,
 
             "pattern_matches":
                 patterns,
@@ -136,11 +198,11 @@ def scan_prompt():
 
         })
 
-    except Exception as e:
+    except Exception:
 
         print(
-            "PROMPT GUARD ERROR:",
-            str(e)
+            "Prompt Guard analysis failed.",
+            flush=True,
         )
 
         return jsonify({
