@@ -32,6 +32,9 @@ def parse_nmap_xml(filepath: str) -> ScanData:
     tree = ET.parse(filepath)
     root = tree.getroot()
 
+    if root.tag != "nmaprun":
+        raise ValueError("Only Nmap XML scan results can be analyzed.")
+
     scan_info = root.attrib.get("args", "")
     hosts = []
 

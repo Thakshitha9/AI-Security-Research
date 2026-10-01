@@ -1,20 +1,80 @@
 
 from flask import Flask, request, jsonify
-from flask_cors import CORS
 
 from core.llm_client import LLMClient
 from core.config import LLMProvider
+from core.history import save_module_analysis
+from core.platform import (
+    install_api_guards,
+    reject_unsafe_xml,
+    risk_level_from_score,
+)
 
 from recon_ai.parser import parse_nmap_xml
 from recon_ai.analyzer import analyze_scan
 
 import tempfile
 import os
-import traceback
+import xml.etree.ElementTree as ET
 
 
 app = Flask(__name__)
-CORS(app)
+install_api_guards(app, max_bytes=2_500_000)
+
+
+def _store_recon_history(hosts):
+    """Store a short summary. The uploaded XML is not kept."""
+
+    if not hosts:
+        save_module_analysis(
+            module="Recon AI",
+            target="Nmap XML upload",
+            risk_level="INFO",
+            risk_score=0,
+            finding="The scan did not contain any hosts.",
+            evidence="",
+            explanation="",
+            recommendation=(
+                "No recommendation was returned because "
+                "the scan had no hosts."
+            ),
+        )
+        return
+
+    scores = [
+        int(host.get("risk_score") or 0)
+        for host in hosts
+    ]
+    top_score = max(scores) if scores else 0
+    level = risk_level_from_score(top_score)
+    addresses = [
+        host.get("ip")
+        for host in hosts
+        if host.get("ip")
+    ]
+    top_finding = "Exposed services were observed."
+    top_recommendation = ""
+
+    for host in hosts:
+        for finding in host.get("findings") or []:
+            if not top_recommendation and finding.get("recommendation"):
+                top_recommendation = finding["recommendation"]
+            if finding.get("description"):
+                top_finding = finding["description"]
+                break
+
+    save_module_analysis(
+        module="Recon AI",
+        target=", ".join(addresses[:5]) or "Nmap XML upload",
+        risk_level=level,
+        risk_score=top_score,
+        finding=top_finding,
+        evidence=f"{len(hosts)} host(s) in the uploaded scan",
+        explanation="",
+        recommendation=top_recommendation or (
+            "No recommendation was returned by the analysis."
+        ),
+    )
 
 
 # ==========================================
@@ -44,14 +104,16 @@ def recon_analyze():
             "error": "XML data must be a string"
         }), 400
 
-    xml_data = xml_data.strip()
+    xml_error = reject_unsafe_xml(xml_data)
 
-    if not xml_data:
-        print("ERROR: XML data is empty")
+    if xml_error:
+        print("ERROR: XML rejected")
 
         return jsonify({
-            "error": "Nmap XML data cannot be empty"
+            "error": xml_error
         }), 400
+
+    xml_data = xml_data.strip()
 
     temp_path = None
 
@@ -73,7 +135,7 @@ def recon_analyze():
             temp_file.write(xml_data)
             temp_path = temp_file.name
 
-        print(f"XML saved at: {temp_path}")
+        print("Temporary XML file created.")
 
         # --------------------------------------
         # Parse Nmap XML
@@ -149,40 +211,46 @@ def recon_analyze():
 
         print(f"Formatted {len(hosts)} hosts")
 
+        _store_recon_history(hosts)
+
         # --------------------------------------
         # Return Result
         # --------------------------------------
 
         print("6. Sending successful response")
 
-        return jsonify({
-
+        response = {
             "status": "success",
-
             "host_count": len(hosts),
+            "hosts": hosts,
+        }
 
-            "hosts": hosts
+        if not hosts:
+            response["message"] = (
+                "The scan did not contain any hosts."
+            )
 
-        }), 200
+        return jsonify(response), 200
 
-    except Exception as e:
+    except ET.ParseError:
+        return jsonify({
+            "error": "Nmap XML could not be parsed."
+        }), 400
 
-        print("\n========== RECON AI ERROR ==========")
-        print(f"Error type: {type(e).__name__}")
-        print(f"Error message: {str(e)}")
-
-        traceback.print_exc()
-
-        print("====================================\n")
+    except ValueError as error:
+        message = str(error)
+        if "Nmap XML" not in message:
+            message = "Nmap XML could not be analyzed."
 
         return jsonify({
+            "error": message
+        }), 400
 
-            "error": "Recon AI analysis failed",
+    except Exception:
+        print("RECON AI ERROR", flush=True)
 
-            "details": str(e),
-
-            "error_type": type(e).__name__
-
+        return jsonify({
+            "error": "Recon AI analysis failed"
         }), 500
 
     finally:

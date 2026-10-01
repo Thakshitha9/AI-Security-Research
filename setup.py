@@ -15,6 +15,10 @@ setup(
         "rich>=13.0",
         "python-dotenv>=1.0",
         "chromadb>=0.5",
+        "groq>=0.18.0",
+        "flask>=3.0",
+        "flask-cors>=4.0",
+        "mysql-connector-python>=8.0",
     ],
     entry_points={
         "console_scripts": [

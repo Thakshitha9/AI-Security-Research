@@ -89,8 +89,8 @@ ASSESSMENT: <one sentence explanation>"""
                 elif line.startswith("ASSESSMENT:"):
                     assessment = line.split(":", 1)[1].strip()
             return score, assessment
-        except Exception as e:
-            return 0.0, f"LLM scan failed: {e}"
+        except Exception:
+            return 0.0, "AI analysis is currently unavailable."
 
     def _get_recommendation(self, score: float, matches: list[PatternMatch]) -> str:
         if score >= 70:

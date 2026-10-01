@@ -102,6 +102,237 @@
             color: #888;
             padding: 80px 20px;
         }
+
+        .api-status {
+            margin: 0 0 16px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .status-info {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .status-warn {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .report-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 22px;
+        }
+
+        .report-badge {
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #e2e8f0;
+            color: #1e293b;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .report-badge.good {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .report-badge.warn {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .report-section {
+            margin-bottom: 22px;
+        }
+
+        .report-section h2,
+        .report-section h3 {
+            margin: 0 0 8px;
+        }
+
+        .report-meta,
+        .report-section p,
+        .report-section li {
+            color: #1f2937;
+            line-height: 1.55;
+        }
+
+        .severity {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .severity-critical,
+        .severity-high {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .severity-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .severity-low,
+        .severity-info {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .severity-unknown {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .finding-card {
+            border: 1px solid #e5e7eb;
+            border-left: 4px solid #94a3b8;
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+        }
+
+        .finding-card.finding-critical,
+        .finding-card.finding-high {
+            border-left-color: #dc2626;
+        }
+
+        .finding-card.finding-medium {
+            border-left-color: #d97706;
+        }
+
+        .finding-card.finding-low,
+        .finding-card.finding-info {
+            border-left-color: #16a34a;
+        }
+
+        .finding-card p {
+            margin: 6px 0 0;
+        }
+
+        .narrative-block {
+            white-space: pre-wrap;
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 14px;
+            color: #1f2937;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            gap: 8px 16px;
+            margin: 0;
+        }
+
+        .summary-grid dt {
+            font-weight: 700;
+            color: #334155;
+        }
+
+        .summary-grid dd {
+            margin: 0;
+        }
+
+        .severity-counts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            padding: 0;
+            list-style: none;
+        }
+
+        .severity-counts li {
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-weight: 700;
+        }
+
+        .risk-banner {
+            display: inline-block;
+            margin: 0;
+            padding: 10px 14px;
+            border: 2px solid currentColor;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .field-label {
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+
+        .field-body {
+            white-space: pre-wrap;
+        }
+
+        .finding-field {
+            margin-top: 8px;
+        }
+
+        @media print {
+            nav,
+            .report-controls,
+            .api-status,
+            .status-message,
+            .empty-state {
+                display: none !important;
+            }
+
+            body,
+            .report-page,
+            .report-container {
+                margin: 0;
+                max-width: none;
+                background: white;
+                box-shadow: none;
+                overflow: visible;
+            }
+
+            .report-view:not([hidden]) {
+                display: block !important;
+            }
+
+            .report-summary,
+            .finding-card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            h2,
+            h3,
+            .field-label {
+                break-after: avoid;
+                page-break-after: avoid;
+            }
+
+            .field-body,
+            .narrative-block {
+                overflow: visible;
+                white-space: pre-wrap;
+            }
+
+            details {
+                display: block;
+            }
+
+            details summary {
+                display: none;
+            }
+
+            .field-body {
+                display: block;
+            }
+        }
     </style>
 </head>
 
@@ -150,17 +381,18 @@
 
         </div>
 
+        <p id="apiStatus" class="api-status"></p>
+
         <div id="statusMessage" class="status-message"></div>
 
         <section class="report-container">
 
             <div id="emptyState" class="empty-state">
-                <h2>No Recon Data Available</h2>
+                <h2 id="emptyStateTitle">No assessment saved</h2>
 
-                <p>
-                    First perform a Recon AI analysis from the
-                    Recon AI page, then return here to generate
-                    the security report.
+                <p id="emptyStateText">
+                    Run a Recon AI analysis first, then return here
+                    to generate the security report.
                 </p>
 
                 <br>
@@ -170,7 +402,9 @@
                 </a>
             </div>
 
-            <pre id="reportContent" style="display:none;"></pre>
+            <div id="reportView" hidden></div>
+
+            <pre id="reportContent" hidden></pre>
 
         </section>
 

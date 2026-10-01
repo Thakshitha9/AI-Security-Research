@@ -1,10 +1,17 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
-import mysql.connector
 import re
 
 from core.llm_client import LLMClient
 from core.config import LLMProvider
+from core.history import dashboard_snapshot, save_phishing_analysis
+from core.platform import (
+    install_api_guards,
+    recommendation_for_level,
+    risk_level_from_score,
+    validate_bounded_text,
+    validate_http_url,
+    MAX_QUESTION_LENGTH,
+)
 
 from phishing_detector.url_analyzer import (
     analyze_url,
@@ -25,86 +32,31 @@ DATASETS_DIR = (
 
 
 app = Flask(__name__)
-CORS(app)
+install_api_guards(app, max_bytes=100_000)
 
-
-# ==========================================
-# MySQL Configuration
-# ==========================================
-
-DB_CONFIG = {
-    "host": "127.0.0.1",
-    "port": 3306,
-    "user": "ai_security_user",
-    "password": "",
-    "database": "ai_security_platform"
-}
-
-
-# ==========================================
-# MySQL Helper
-# ==========================================
-
-def get_db_connection():
-    return mysql.connector.connect(**DB_CONFIG)
-
-
-# ==========================================
-# Save Phishing Analysis
-# ==========================================
 
 def save_analysis_to_database(
     url,
     risk_score,
     indicators,
-    ai_explanation
+    ai_explanation,
+    risk_level,
+    finding,
+    evidence,
+    recommendation,
 ):
+    """Persist a phishing result. Storage failure does not fail the API."""
 
-    connection = None
-    cursor = None
-
-    try:
-
-        connection = get_db_connection()
-        cursor = connection.cursor()
-
-        query = """
-            INSERT INTO phishing_analysis
-            (
-                url,
-                risk_score,
-                indicators,
-                ai_explanation
-            )
-            VALUES (%s, %s, %s, %s)
-        """
-
-        indicators_text = ", ".join(indicators)
-
-        values = (
-            url,
-            risk_score,
-            indicators_text,
-            ai_explanation
-        )
-
-        cursor.execute(query, values)
-
-        connection.commit()
-
-        print("Analysis saved to MySQL.")
-
-    except mysql.connector.Error as e:
-
-        print("MYSQL ERROR:", str(e))
-
-    finally:
-
-        if cursor:
-            cursor.close()
-
-        if connection:
-            connection.close()
+    save_phishing_analysis(
+        url=url,
+        risk_score=risk_score,
+        indicators=", ".join(indicators),
+        ai_explanation=ai_explanation,
+        risk_level=risk_level,
+        finding=finding,
+        evidence=evidence,
+        recommendation=recommendation,
+    )
 
 
 # ==========================================
@@ -127,20 +79,22 @@ def health():
 @app.route("/api/phishing/analyze", methods=["POST"])
 def analyze_phishing_url():
 
-    data = request.get_json()
+    data = request.get_json(silent=True)
 
-    if not data or "url" not in data:
+    if not isinstance(data, dict) or "url" not in data:
 
         return jsonify({
             "error": "URL is required"
         }), 400
 
-    url = data["url"].strip()
+    url = data["url"].strip() if isinstance(data.get("url"), str) else ""
 
-    if not url:
+    url_error = validate_http_url(url)
+
+    if url_error:
 
         return jsonify({
-            "error": "URL cannot be empty"
+            "error": url_error
         }), 400
 
 
@@ -155,6 +109,11 @@ def analyze_phishing_url():
     # Step 2: AI Explanation
     # --------------------------------------
 
+    ai_explanation = (
+        "AI explanation is currently unavailable. "
+        "The rule-based URL analysis was completed successfully."
+    )
+
     try:
 
         client = LLMClient(
@@ -166,33 +125,34 @@ def analyze_phishing_url():
             analysis
         )
 
-    except Exception as e:
-        import traceback
-
-        ai_explanation = (
-            "AI explanation is currently unavailable. "
-            "The rule-based URL analysis was completed successfully."
-        )
-
-        error_details = traceback.format_exc()
-
-        with open("gemini_error.txt", "w", encoding="utf-8") as f:
-            f.write(error_details)
-
-    print("AI ERROR:", repr(e), flush=True)
-    print("AI ERROR TYPE:", type(e).__name__, flush=True)
-    print("AI ERROR MESSAGE:", repr(e), flush=True)
-    traceback.print_exc()
+    except Exception:
+        print("AI explanation unavailable.", flush=True)
 
     # --------------------------------------
     # Step 3: Save Result to MySQL
     # --------------------------------------
 
+    risk_level = risk_level_from_score(analysis.risk_score)
+    evidence = list(analysis.indicators)
+
+    if evidence:
+        finding = evidence[0]
+    else:
+        finding = (
+            "No phishing indicators were detected by the rule checks."
+        )
+
+    recommendation = recommendation_for_level(risk_level)
+
     save_analysis_to_database(
         analysis.url,
         analysis.risk_score,
         analysis.indicators,
-        ai_explanation
+        ai_explanation,
+        risk_level,
+        finding,
+        "; ".join(evidence),
+        recommendation,
     )
 
 
@@ -206,7 +166,17 @@ def analyze_phishing_url():
 
         "risk_score": analysis.risk_score,
 
+        "risk_level": risk_level,
+
         "indicators": analysis.indicators,
+
+        "finding": finding,
+
+        "evidence": evidence,
+
+        "explanation": ai_explanation,
+
+        "recommendation": recommendation,
 
         "ai_explanation": ai_explanation
 
@@ -220,132 +190,9 @@ def analyze_phishing_url():
 @app.route("/api/dashboard/stats", methods=["GET"])
 def dashboard_stats():
 
-    connection = None
-    cursor = None
+    snapshot = dashboard_snapshot()
 
-    try:
-
-        connection = get_db_connection()
-
-        cursor = connection.cursor(
-            dictionary=True
-        )
-
-
-        # --------------------------------------
-        # Total analyses
-        # --------------------------------------
-
-        cursor.execute("""
-            SELECT COUNT(*) AS total
-            FROM phishing_analysis
-        """)
-
-        total = cursor.fetchone()["total"]
-
-
-        # --------------------------------------
-        # High-risk analyses
-        # --------------------------------------
-
-        cursor.execute("""
-            SELECT COUNT(*) AS high_risk
-            FROM phishing_analysis
-            WHERE risk_score >= 70
-        """)
-
-        high_risk = cursor.fetchone()["high_risk"]
-
-
-        # --------------------------------------
-        # Medium-risk analyses
-        # --------------------------------------
-
-        cursor.execute("""
-            SELECT COUNT(*) AS medium_risk
-            FROM phishing_analysis
-            WHERE risk_score >= 40
-            AND risk_score < 70
-        """)
-
-        medium_risk = cursor.fetchone()["medium_risk"]
-
-
-        # --------------------------------------
-        # Low-risk analyses
-        # --------------------------------------
-
-        cursor.execute("""
-            SELECT COUNT(*) AS low_risk
-            FROM phishing_analysis
-            WHERE risk_score < 40
-        """)
-
-        low_risk = cursor.fetchone()["low_risk"]
-
-
-        # --------------------------------------
-        # Recent analyses
-        # --------------------------------------
-
-        cursor.execute("""
-            SELECT
-                id,
-                url,
-                risk_score,
-                created_at
-            FROM phishing_analysis
-            ORDER BY id DESC
-            LIMIT 10
-        """)
-
-        recent_analyses = cursor.fetchall()
-
-
-        # --------------------------------------
-        # Convert datetime
-        # --------------------------------------
-
-        for item in recent_analyses:
-
-            if item["created_at"]:
-
-                item["created_at"] = (
-                    item["created_at"].isoformat()
-                )
-
-
-        return jsonify({
-
-            "total": total,
-
-            "high_risk": high_risk,
-
-            "medium_risk": medium_risk,
-
-            "low_risk": low_risk,
-
-            "recent_analyses": recent_analyses
-
-        })
-
-
-    except mysql.connector.Error as e:
-
-        print("MYSQL ERROR:", str(e))
-
-        return jsonify({
-            "error": "Unable to fetch dashboard statistics"
-        }), 500
-
-
-    finally:
-
-        if cursor:
-            cursor.close()
-
-        if connection:
-            connection.close()
+    return jsonify(snapshot)
 
 
 # ==========================================
@@ -355,28 +202,35 @@ def dashboard_stats():
 @app.route("/api/rag/ask", methods=["POST"])
 def ask_rag():
 
-    data = request.get_json()
+    data = request.get_json(silent=True)
 
 
     # --------------------------------------
     # Validate request
     # --------------------------------------
 
-    if not data or "question" not in data:
+    if not isinstance(data, dict) or "question" not in data:
 
         return jsonify({
             "error": "Question is required"
         }), 400
 
 
-    question = data["question"].strip()
+    question = data["question"] if isinstance(data.get("question"), str) else ""
 
+    question_error = validate_bounded_text(
+        question,
+        "Question",
+        MAX_QUESTION_LENGTH,
+    )
 
-    if not question:
+    if question_error:
 
         return jsonify({
-            "error": "Question cannot be empty"
+            "error": question_error
         }), 400
+
+    question = question.strip()
 
 
     try:
@@ -504,9 +358,9 @@ def ask_rag():
         })
 
 
-    except Exception as e:
+    except Exception:
 
-        print("RAG ERROR:", str(e))
+        print("RAG analysis failed.", flush=True)
 
         return jsonify({
 
@@ -524,5 +378,5 @@ if __name__ == "__main__":
     app.run(
         host="127.0.0.1",
         port=5000,
-        debug=True
+        debug=False
     )

@@ -209,11 +209,6 @@ async function analyzeNmapFile() {
             response.status
         );
 
-        console.log(
-            "Recon API raw response:",
-            responseText
-        );
-
         let data = null;
 
         try {
@@ -222,9 +217,7 @@ async function analyzeNmapFile() {
                 : null;
         } catch (jsonError) {
             throw new Error(
-                "The Recon API returned an invalid JSON response. " +
-                `HTTP status: ${response.status}. ` +
-                `Response: ${responseText.substring(0, 500)}`
+                "The Recon API returned an unreadable response."
             );
         }
 
@@ -553,7 +546,7 @@ function createFindingElement(finding) {
     riskBadge.className =
         `risk-badge ${riskClass}`;
 
-    riskBadge.textContent = riskLevel;
+    riskBadge.textContent = "Risk Level: " + riskLevel;
 
     findingHeader.appendChild(findingPort);
     findingHeader.appendChild(riskBadge);
@@ -563,8 +556,16 @@ function createFindingElement(finding) {
     description.className = "finding-description";
 
     description.textContent =
-        finding.description ||
-        "No description available.";
+        "Finding: " + (
+            finding.description ||
+            "No finding text was returned."
+        );
+
+    const evidence = document.createElement("div");
+
+    evidence.className = "finding-description";
+    evidence.textContent =
+        "Evidence: Port " + port + " / " + service;
 
     const recommendation = document.createElement("div");
 
@@ -578,7 +579,7 @@ function createFindingElement(finding) {
 
     const recommendationText = document.createTextNode(
         finding.recommendation ||
-        "Review and restrict access as appropriate."
+        "No recommendation was returned by the analysis."
     );
 
     recommendation.appendChild(recommendationLabel);
@@ -586,6 +587,7 @@ function createFindingElement(finding) {
 
     findingContainer.appendChild(findingHeader);
     findingContainer.appendChild(description);
+    findingContainer.appendChild(evidence);
     findingContainer.appendChild(recommendation);
 
     return findingContainer;

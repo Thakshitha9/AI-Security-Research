@@ -33,6 +33,8 @@ Thumbs.db
 
 # Sensitive test files
 test_email.txt
+gemini_error.txt
+*.log
 
 # Local environment files
 .env

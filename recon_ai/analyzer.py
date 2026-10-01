@@ -133,10 +133,16 @@ def _analyze_host(
     # AI security analysis
     # ---------------------------------------------
 
-    llm_analysis = _generate_llm_analysis(
-        client,
-        scan_summary
-    )
+    try:
+        llm_analysis = _generate_llm_analysis(
+            client,
+            scan_summary
+        )
+    except Exception:
+        llm_analysis = (
+            "AI analysis is currently unavailable. "
+            "The rule-based service review was completed."
+        )
 
     # ---------------------------------------------
     # Final risk score

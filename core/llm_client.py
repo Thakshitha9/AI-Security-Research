@@ -1,4 +1,3 @@
-import json
 import httpx
 
 from .config import LLMProvider, get_provider_config, ProviderConfig
@@ -33,19 +32,19 @@ class LLMClient:
         # Try Groq
         groq_cfg = get_provider_config(LLMProvider.GROQ)
 
-        if groq_cfg.api_key:
+        if groq_cfg.api_key and not groq_cfg.api_key.startswith("your_"):
             return LLMProvider.GROQ, groq_cfg
 
         # Try Hugging Face
         hf_cfg = get_provider_config(LLMProvider.HUGGINGFACE)
 
-        if hf_cfg.api_key:
+        if hf_cfg.api_key and not hf_cfg.api_key.startswith("your_"):
             return LLMProvider.HUGGINGFACE, hf_cfg
 
         # Try Gemini
         gemini_cfg = get_provider_config(LLMProvider.GEMINI)
 
-        if gemini_cfg.api_key:
+        if gemini_cfg.api_key and not gemini_cfg.api_key.startswith("your_"):
             return LLMProvider.GEMINI, gemini_cfg
 
         raise RuntimeError(
@@ -93,6 +92,18 @@ class LLMClient:
 
         raise ValueError(f"Unknown provider: {self.provider}")
 
+    def _require_success(self, response, provider_name: str) -> None:
+        """Reject a failed provider response without exposing its body or URL."""
+
+        if response.status_code == 200:
+            return
+
+        print(
+            f"{provider_name} ERROR: HTTP {response.status_code}",
+            flush=True,
+        )
+        raise RuntimeError(f"The {provider_name} request failed.")
+
     def _ollama_generate(
         self,
         prompt: str,
@@ -117,7 +128,7 @@ class LLMClient:
             json=payload
         )
 
-        r.raise_for_status()
+        self._require_success(r, "Ollama")
 
         return r.json()["response"]
 
@@ -154,7 +165,7 @@ class LLMClient:
             },
         )
 
-        r.raise_for_status()
+        self._require_success(r, "Groq")
 
         return r.json()["choices"][0]["message"]["content"]
 
@@ -192,10 +203,7 @@ class LLMClient:
             },
         )
 
-        if r.status_code != 200:
-            print("HF ERROR:", r.text)
-
-        r.raise_for_status()
+        self._require_success(r, "Hugging Face")
 
         data = r.json()
 
@@ -250,10 +258,7 @@ class LLMClient:
             },
         )
 
-        if r.status_code != 200:
-            print("GEMINI ERROR:", r.text)
-
-        r.raise_for_status()
+        self._require_success(r, "Gemini")
 
         data = r.json()
 
@@ -262,8 +267,7 @@ class LLMClient:
 
         except (KeyError, IndexError, TypeError) as exc:
             raise RuntimeError(
-                "Unexpected Gemini response: "
-                + json.dumps(data)
+                "The Gemini response did not include any text."
             ) from exc
 
     def close(self):
